@@ -4,11 +4,12 @@ services:
   web:
     build: .
     image: octoprobe-testbed_micropython-fastapi:${IMAGE_VERSION}
-    command: uvicorn server.app.main:app --host 0.0.0.0 --port 8000
+    command: uvicorn app.main:app --host 0.0.0.0 --port 443 --ssl-keyfile=${SSL_KEY} --ssl-certfile=${SSL_CERT}
     volumes:
-      - .:/server
+      - ./server:/server
+      - /etc/letsencrypt:/etc/letsencrypt:ro
     ports:
-      - 8000:8000
-    
+      - '${APP_HOST}:${APP_PORT}:443'
+    user: '${UID}:${GID}'
     env_file:
       - .env

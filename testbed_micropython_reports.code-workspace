@@ -4,5 +4,27 @@
 			"path": "."
 		}
 	],
-	"settings": {}
-}
+"settings": {
+		"[python]": {
+			"editor.formatOnSave": true,
+			"editor.defaultFormatter": "charliermarsh.ruff"
+		},
+		"ruff.enable": true,
+		"ruff.fixAll": true,
+		"ruff.lint.enable": true,
+		"mpremote.srcSubdirectory": "src",
+		"python.testing.pytestArgs": [
+			"-v",
+			"-s",
+			"tests"
+		],
+		"python.testing.cwd": "${workspaceFolder}",
+		"python.testing.unittestEnabled": false,
+		"python.testing.pytestEnabled": true
+	},
+	"extensions": {
+		"recommendations": [
+			"charliermarsh.ruff",
+			"ms-python.python",
+		]
+	}}

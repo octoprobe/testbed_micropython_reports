@@ -5,15 +5,33 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: FastAPI",
+            "name": "FastAPI",
             "type": "debugpy",
             "request": "launch",
             "module": "uvicorn",
             "args": [
-                "server.app.main:app",
+                "app.main:app",
                 "--reload"
             ],
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}/server",
+            "jinja": true
+        },
+        {
+            "name": "parse_logfile.py",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "app.parse_logfile",
+            "args": [],
+            "cwd": "${workspaceFolder}/server",
+            "jinja": true
+        },
+        {
+            "name": "util_path_replace.py",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "app.util_path_replace",
+            "args": [],
+            "cwd": "${workspaceFolder}/server",
             "jinja": true
         }
     ]
