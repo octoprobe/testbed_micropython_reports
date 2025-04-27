@@ -1,0 +1,65 @@
+body {
+    font-family: 'Arial', Verdana, sans-serif;
+    font-size: 14px;
+}
+
+ul {
+    list-style-type: none;
+}
+
+/*
+a.file {
+    color: black;
+}
+*/
+
+/*
+a.directory {
+    color: blue;
+}
+*/
+
+a > img {
+    width: 16px;
+    height: 16px;
+    margin-top: 6px;
+    margin-right: 12px;
+    margin-bottom: 0px;
+}
+
+a > img.file {
+    color: black;
+}
+
+a > img.directory {
+    color: blue;
+}
+
+/* 
+image {
+ width:16px;
+ height:16px;
+ margin-right:5px;
+ }
+*/
+
+.listing_gray {
+    color: gray;
+    text-decoration: none;
+    font-size: smaller;
+}
+.listing_black {
+    color: black;
+    font-weight: bold;
+    text-decoration: none;
+}
+.listing_green {
+    color: green;
+    font-weight: bold;
+    text-decoration: none;
+}
+.listing_firmware {
+    color: blue;
+    font-weight: bold;
+    text-decoration: none;
+}

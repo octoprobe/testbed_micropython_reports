@@ -6,9 +6,11 @@ from fastapi import HTTPException
 from fastapi.responses import HTMLResponse
 from starlette.datastructures import URL
 
+from app.render_directory_style import STYLESHEET, get_listing_style
+
 from .constants import DIRECTORY_REPORTS
 from .render_ansii_color import render_ansi_color
-from .render_log import DEFAULT_LOGFILE, is_logfile, prune_logfiles, render_log
+from .render_log import DEFAULT_LOGFILE, is_logfile, render_log
 from .render_markdown import render_markdown
 
 logger = logging.Logger(__file__)
@@ -72,6 +74,7 @@ def render_directory_or_file(path: str, url: URL, severity: str) -> HTMLResponse
         media_type = {
             ".html": "text/html",
             ".txt": "text/plain",
+            ".spec": "text/plain",
             ".json": "text/json",
         }.get(directory.suffix, None)
         if media_type is None:
@@ -87,73 +90,48 @@ def render_directory_or_file(path: str, url: URL, severity: str) -> HTMLResponse
 
     # List files and directories
     files = sorted(directory.glob("*"), key=key_number_sort, reverse=True)
-    prune_logfiles(files=files)
+    # prune_logfiles(files=files)
     html_files: list[str] = []
 
-    def add_html_file(is_dir: bool, path_: str, name: str) -> None:
-        class_name = "directory" if is_dir else "file"
+    def add_html_file(filename: pathlib.Path, name_override: str | None = None) -> None:
+        try:
+            path_ = str(filename.relative_to(DIRECTORY_REPORTS))
+        except ValueError:
+            assert name_override == ".."
+            return
+        name = filename.name
+        if name_override is not None:
+            name = name_override
+        is_dir = filename.is_dir()
+        styles = " ".join(
+            [
+                get_listing_style(path=path_).css_style,
+                "directory" if is_dir else "file",
+            ]
+        )
         image = "bootstrap_folder.svg" if is_dir else "bootstrap_file-text.svg"
         html_files.append(
             f"""<li>
-<a class="{class_name}" href="/{path_}">
-<img class="{class_name}" src="/static/{image}" alt="{class_name}"/>
+<a class="{styles}" href="/{path_}">
+<img class="{styles}" src="/static/{image}" alt="{styles}"/>
 {name}
 </a>
 </li>"""
         )
 
-    if path != "":
-        path_ = str(directory.parent.relative_to(DIRECTORY_REPORTS))
-        add_html_file(is_dir=True, path_=path_, name="..")
+    # Add the top directory
+    add_html_file(filename=directory.parent, name_override="..")
 
-    for item in files:
-        path_ = str(item.relative_to(DIRECTORY_REPORTS))
-        is_dir = item.is_dir()
-        add_html_file(is_dir=is_dir, path_=path_, name=item.name)
+    for filename in files:
+        add_html_file(filename=filename)
 
     # Generate HTML response
-    stylesheet = """
-ul {
-    list-style-type: none;
-}
-
-a.file {
-    color: black;
-}
-
-a.directory {
-    color: blue;
-}
-
-a > img {
-    width: 16px;
-    height: 16px;
-    margin-top: 6px;
-    margin-right: 12px;
-    margin-bottom: 0px;
-}
-
-a > img.file {
-    color: black;
-}
-
-a > img.directory {
-    color: blue;
-}
-
-# image {
-# width:16px;
-# height:16px;
-# margin-right:5px;
-# }
-"""
-
     html_content = f"""
     <html>
         <head>
         <title>Directory Browser</title>
         <style>
-        {stylesheet}
+        {STYLESHEET}
         </style>
         </head>
         <body>
