@@ -1,10 +1,10 @@
 import json
 import pathlib
 
-from . import constants, util_path_replace
+from testbed_micropython.constants import DIRECTORY_NAME_TESTRESULTS
+from testbed_micropython.testreport.util_testreport import FILENAME_CONTEXT_JSON
 
-DIRECTORY_NAME_TESTRESULTS = "testresults"
-FILENAME_CONTEXT_JSON = "context.json"
+from . import constants, util_path_replace
 
 
 def get_directory_testresults(logfile: pathlib.Path) -> pathlib.Path:

@@ -8,7 +8,7 @@ from markupsafe import Markup
 
 
 class Segments(list[str | Markup]):
-    def write(self, fout: io.TextIO) -> None:
+    def write(self, fout: io.StringIO) -> None:
         for segment in self:
             if isinstance(segment, Markup):
                 fout.write(segment)

@@ -24,15 +24,6 @@
             "args": [],
             "cwd": "${workspaceFolder}/server",
             "jinja": true
-        },
-        {
-            "name": "util_path_replace.py",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "app.util_path_replace",
-            "args": [],
-            "cwd": "${workspaceFolder}/server",
-            "jinja": true
         }
     ]
 }
