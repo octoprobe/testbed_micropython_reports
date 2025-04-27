@@ -42,7 +42,7 @@ docker-compose up --build
 
 ```bash
 docker build . --tag octoprobe-testbed_micropython-fastapi
-docker run --rm -it -p 8000:80 octoprobe-testbed_micropython-fastapi:latest
+docker run --rm -it -p 8000:80 -v $(pwd)/reports:/server/reports octoprobe-testbed_micropython-fastapi:latest
 ```
 
 ## Run docker standalone ipv6 (abandoned)

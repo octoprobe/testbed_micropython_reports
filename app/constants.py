@@ -1,5 +1,14 @@
+import os
 import pathlib
 
-DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
-DIRECTORY_REPORTS = DIRECTORY_OF_THIS_FILE.parent / "reports"
-DIRECTORY_REPORTS.mkdir(parents=True, exist_ok=True)
+ENV_DIRECTORY_REPORTS = "DIRECTORY_REPORTS"
+
+
+DIRECTORY_REPORTS_FALLBACK = "/server/reports"
+DIRECTORY_REPORTS = pathlib.Path(
+    os.getenv(ENV_DIRECTORY_REPORTS, DIRECTORY_REPORTS_FALLBACK)
+)
+if not DIRECTORY_REPORTS.is_dir():
+    raise ValueError(
+        f"Enivornment variable '{ENV_DIRECTORY_REPORTS}' points to '{DIRECTORY_REPORTS}' which is NOT a directory! Fallback is '{DIRECTORY_REPORTS_FALLBACK}'."
+    )

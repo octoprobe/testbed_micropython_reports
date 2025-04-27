@@ -103,7 +103,10 @@ class PathMatch:
 
 class PathReplace:
     def __init__(
-        self, directories: dict[str, str], git_ref: dict[str, str], urls: dict[str, str]
+        self,
+        directories: dict[str, str],
+        git_ref: dict[str, str],
+        urls: dict[str, str],
     ) -> None:
         self.directories = directories
         self.git_ref = git_ref
