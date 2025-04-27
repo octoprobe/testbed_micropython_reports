@@ -1,5 +1,7 @@
+import io
 import logging
 import os
+import shutil
 import tarfile
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -10,7 +12,6 @@ from fastapi.templating import Jinja2Templates
 from .constants import DIRECTORY_REPORTS
 from .render_directory import render_directory_or_file
 from .render_log import SEVERITY_DEFAULT
-from .util_context import DIRECTORY_NAME_TESTRESULTS
 
 logger = logging.Logger(__file__)
 
@@ -34,7 +35,7 @@ async def upload_tar_file(
     """
     Endpoint to upload a tar file via HTTPS POST.
 
-    curl -X POST -F "label=ch_hans_1-2025-04-22_12-33-22" -F "file=@/home/maerki/work_octoprobe_testbed_micropython/results_yoga_2025-04-21b.tgz" -k http://localhost:8000/upload
+    curl -X POST -F "label=github_testbed_micropython_107" -F "file=@/home/maerki/Downloads/testresults/github_testbed_micropython_107.tgz" -k http://localhost:8000/upload
 
     curl -X POST -F "label=ch_hans_1-2025-04-22_12-33-22" -F "file=@/home/maerki/work_octoprobe_testbed_micropython/results_yoga_2025-04-21b.tgz" -k https://reports.octoprobe.org/upload
 
@@ -42,46 +43,39 @@ async def upload_tar_file(
     """
     max_file_size_bytes = 10_1024_1024  # 10 MB in bytes
 
-    unpack_dir = DIRECTORY_REPORTS / label  # Unpack into a folder named after the label
-    unpack_dir.mkdir(parents=True, exist_ok=True)
-    filename = unpack_dir / f"{label}.tgz"
+    final_dir = DIRECTORY_REPORTS / label
+    filename_tgz = final_dir / f"{label}.tgz"
     try:
-        # Download and save file
-        with filename.open("wb") as f:
-            f.write(await file.read())
+        # Download tarfile and keep in memory
+        tarfile_bytes = await file.read()
 
         # Check file size
-        file_size_bytes = filename.stat().st_size
-        if file_size_bytes > max_file_size_bytes:
-            filename.unlink()  # Delete the file if it exceeds the size limit
+        tarfile_size_bytes = len(tarfile_bytes)
+        if tarfile_size_bytes > max_file_size_bytes:
             raise HTTPException(
                 status_code=413,  # Payload Too Large
-                detail=f"File size {file_size_bytes / (1024 * 1024):0.1f} MB exceeds the {max_file_size_bytes / (1024 * 1024):0.1f} MB limit!",
+                detail=f"File size {tarfile_size_bytes / (1024 * 1024):0.1f} MB exceeds the {max_file_size_bytes / (1024 * 1024):0.1f} MB limit!",
             )
 
-        # Untar
-        with tarfile.open(filename, "r:gz") as tar:
-            tar.extractall(path=unpack_dir)
+        # Prepare folder
+        shutil.rmtree(final_dir, ignore_errors=True)
+        final_dir.parent.mkdir(parents=True, exist_ok=True)
 
-        # Make sure the subdirectory is called 'testresults'
-        directories = [
-            directory for directory in unpack_dir.iterdir() if directory.is_dir()
-        ]
-        if len(directories) == 1:
-            directory_report = directories[0]
-            directory_report.rename(
-                directory_report.with_name(DIRECTORY_NAME_TESTRESULTS)
-            )
-        else:
-            logger.warning(
-                f"Expected one directory but got: {[str(d) for d in directories]}!"
-            )
+        # Untar into tmp_dir
+        with tarfile.open(fileobj=io.BytesIO(tarfile_bytes), mode="r:gz") as tar:
+            tar.extractall(path=final_dir)
+
+        # Save tar file
+        filename_tgz.write_bytes(tarfile_bytes)
 
         return JSONResponse(
-            content={"message": f"File '{filename}' uploaded successfully."},
+            content={"message": f"File '{filename_tgz}' uploaded successfully."},
             status_code=200,
         )
     except Exception as e:
+        logger.exception(e)
+        # Clean up directory
+        shutil.rmtree(final_dir, ignore_errors=True)
         raise HTTPException(
             status_code=500, detail=f"Failed to upload file: {str(e)}"
         ) from e

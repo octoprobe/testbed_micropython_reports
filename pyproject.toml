@@ -27,7 +27,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
-    "testbed_micropython@git+https://github.com/octoprobe/testbed_micropython@hmaerki/reporting_proposal",
+    "testbed_micropython@git+https://github.com/octoprobe/testbed_micropython@main",
     "fastapi~=0.115.5",
     "uvicorn~=0.32.0",
     "starlette~=0.41.2",
