@@ -1,18 +1,16 @@
-import os
 import logging
+import os
 import tarfile
 
-from .util_context import DIRECTORY_NAME_TESTRESULTS
-from .render_directory import render_directory_or_file
-from .render_log import SEVERITY_DEFAULT
-
-from fastapi import UploadFile, File, FastAPI, HTTPException, Request, Form
-from fastapi.templating import Jinja2Templates
+from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import JSONResponse
-from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
 from .constants import DIRECTORY_REPORTS
+from .render_directory import render_directory_or_file
+from .render_log import SEVERITY_DEFAULT
+from .util_context import DIRECTORY_NAME_TESTRESULTS
 
 logger = logging.Logger(__file__)
 
@@ -42,7 +40,7 @@ async def upload_tar_file(
 
     -k: Skips SSL verification
     """
-    MAX_FILE_SIZE_BYTES = 10_1024_1024  # 10 MB in bytes
+    max_file_size_bytes = 10_1024_1024  # 10 MB in bytes
 
     unpack_dir = DIRECTORY_REPORTS / label  # Unpack into a folder named after the label
     unpack_dir.mkdir(parents=True, exist_ok=True)
@@ -54,11 +52,11 @@ async def upload_tar_file(
 
         # Check file size
         file_size_bytes = filename.stat().st_size
-        if file_size_bytes > MAX_FILE_SIZE_BYTES:
+        if file_size_bytes > max_file_size_bytes:
             filename.unlink()  # Delete the file if it exceeds the size limit
             raise HTTPException(
                 status_code=413,  # Payload Too Large
-                detail=f"File size {file_size_bytes / (1024 * 1024):0.1f} MB exceeds the {MAX_FILE_SIZE_BYTES / (1024 * 1024):0.1f} MB limit!",
+                detail=f"File size {file_size_bytes / (1024 * 1024):0.1f} MB exceeds the {max_file_size_bytes / (1024 * 1024):0.1f} MB limit!",
             )
 
         # Untar
@@ -84,7 +82,9 @@ async def upload_tar_file(
             status_code=200,
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to upload file: {str(e)}")
+        raise HTTPException(
+            status_code=500, detail=f"Failed to upload file: {str(e)}"
+        ) from e
 
 
 # Mount the 'uploads' directory for browsing

@@ -13,7 +13,7 @@ This is base from https://github.com/aws-samples/python-fastapi-demo-docker.
 ```bash
 uv venv --python 3.13.3 .venv
 source .venv/bin/activate
-uv pip install -r server/requirements.txt
+uv pip install -e .
 ``` 
 
 ## Installation
@@ -38,11 +38,14 @@ docker-compose down
 docker-compose up --build
 ```
 
-## Run docker standalone (abandoned)
+## Run docker standalone on port 8000
 
-docker run --rm -it -p 80:80 octoprobe-testbed_micropython-fastapi:latest
+```bash
+docker build . --tag octoprobe-testbed_micropython-fastapi
+docker run --rm -it -p 8000:80 octoprobe-testbed_micropython-fastapi:latest
+```
 
-## Run docker standalone (abandoned)
+## Run docker standalone ipv6 (abandoned)
 
 ```bash
 docker run --rm -it --ip 0.0.0.0 -p 8000:8000 octoprobe-testbed_micropython-fastapi:latest
@@ -61,8 +64,3 @@ docker run --rm -it --ip6 2a00:1169:110:49c0:: -p 80:8000 octoprobe-testbed_micr
 ==> listen tcp4 0.0.0.0:80: bind: address already in use.
 ```
 ==> could not make v6 docker container visible to the world...
-
-## License
-
-This project is licensed under the MIT-0 License. See the [LICENSE](LICENSE) file.
-

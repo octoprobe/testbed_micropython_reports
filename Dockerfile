@@ -1,27 +1,19 @@
-# Use an official Python runtime as a parent image
-FROM python:3.13.3-slim-bookworm AS builder
-
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1
-
-# Set work directory
-WORKDIR /server
-
-# Install system dependencies and Python dependencies
-COPY ./server/requirements.txt /server/
-RUN pip wheel --no-cache-dir --no-deps --wheel-dir /server/wheels -r requirements.txt
-
-FROM python:3.13.3-slim-bookworm AS runner
+FROM python:3.13.3-slim-bookworm
 
 WORKDIR /server
 
-# Install system dependencies and Python dependencies
-COPY --from=builder /server/wheels /server/wheels
-COPY --from=builder /server/requirements.txt .
-RUN pip install --no-cache-dir /server/wheels/* \
-    && pip install --no-cache-dir uvicorn
 
+RUN apt-get update && apt-get install -y git && \
+    apt-get purge -y curl && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+    # Install system dependencies and Python dependencies
+COPY ./pyproject.toml /server/
+COPY ./README.md /server/
+COPY ./app /server/app
+
+RUN pip install --no-cache-dir .
 # Copy project
 COPY . /server/
 

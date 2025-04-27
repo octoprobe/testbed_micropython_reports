@@ -1,16 +1,15 @@
 from __future__ import annotations
 
 import dataclasses
-import itertools
-import re
 import html
+import itertools
 import logging
+import re
 import typing
 
 from markupsafe import Markup
 
 from .util_html import Segments
-
 
 logger = logging.Logger(__file__)
 
@@ -179,7 +178,7 @@ def self_tests():
             print("line:    " + line)
             print("result:  " + line_result)
             print("expected:" + line_expected)
-            assert False
+            raise ValueError("Test failed")
 
     test_expand(
         "A /home/testresults/RUN-TESTS_EXTMOD_HARDWARE@5f2c-RPI_PICO_W/testresults.txt B",

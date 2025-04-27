@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import re
 import pathlib
-from markupsafe import Markup
-from .util_html import Segments
+import re
 
-from starlette.datastructures import URL
 from fastapi.responses import HTMLResponse
-from . import util_context
+from markupsafe import Markup
+from starlette.datastructures import URL
 
+from . import util_context
+from .util_html import Segments
 
 CSS = pathlib.Path(__file__).with_suffix(".css").read_text()
 """
@@ -218,7 +218,7 @@ class Render:
         logfile_text = self.logfile.read_text()
 
         schema_color_active = logfile_text.find("[COLOR_INFO]") >= 0
-        path_directory, _, path_filename = self.url.path.rpartition("/")
+        path_directory, _, _path_filename = self.url.path.rpartition("/")
 
         segments = Segments()
 

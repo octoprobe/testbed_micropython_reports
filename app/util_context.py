@@ -1,7 +1,7 @@
-import pathlib
-from . import util_path_replace
-from . import constants
 import json
+import pathlib
+
+from . import constants, util_path_replace
 
 DIRECTORY_NAME_TESTRESULTS = "testresults"
 FILENAME_CONTEXT_JSON = "context.json"

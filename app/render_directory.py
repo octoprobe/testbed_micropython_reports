@@ -2,15 +2,14 @@ import logging
 import pathlib
 import re
 
-from .render_markdown import render_markdown
-
-from .render_log import DEFAULT_LOGFILE, is_logfile, prune_logfiles, render_log
 from fastapi import HTTPException
 from fastapi.responses import HTMLResponse
+from starlette.datastructures import URL
 
 from .constants import DIRECTORY_REPORTS
 from .render_ansii_color import render_ansi_color
-from starlette.datastructures import URL
+from .render_log import DEFAULT_LOGFILE, is_logfile, prune_logfiles, render_log
+from .render_markdown import render_markdown
 
 logger = logging.Logger(__file__)
 
@@ -37,7 +36,7 @@ def key_number_sort(filename: pathlib.Path | str) -> str:
         filename = str(filename)
     assert isinstance(filename, str)
 
-    def f(match: re.Match) -> str | int:
+    def f(match: re.Match) -> str:
         number = match.group("number")
         if number is not None:
             return format(int(number), "010d")

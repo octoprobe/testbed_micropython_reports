@@ -1,13 +1,3 @@
-import re
-import pathlib
-
-from starlette.datastructures import URL
-from fastapi import HTTPException
-from fastapi.responses import HTMLResponse
-from ansi2html import Ansi2HTMLConverter
-
-from .constants import DIRECTORY_REPORTS
-
 """
 
 https://github.com/pycontribs/ansi2html/blob/main/src/ansi2html/converter.py#L329-L333
@@ -21,6 +11,16 @@ https://github.com/pycontribs/ansi2html/blob/main/src/ansi2html/converter.py#L34
             return self.url_matcher.sub(r"\\url{\1}", line)
         return self.url_matcher.sub(r'<a href="\1">\1</a>', line)
 """
+
+import pathlib
+import re
+
+from ansi2html import Ansi2HTMLConverter
+from fastapi import HTTPException
+from fastapi.responses import HTMLResponse
+from starlette.datastructures import URL
+
+from .constants import DIRECTORY_REPORTS
 
 RE_LINKS = re.compile(r"\/(?:[^\/\s]+\/)*[^\/\s]+")
 r"""
@@ -88,6 +88,7 @@ def render_ansi_color(color_file: pathlib.Path, url: URL) -> HTMLResponse:
         if not linkify:
             html_content = do_linkify(html_content, url=url)
 
+        html_pre = ""
         if not full:
             html_pre = (
                 """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
@@ -125,4 +126,4 @@ def render_ansi_color(color_file: pathlib.Path, url: URL) -> HTMLResponse:
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to render .color file: {str(e)}"
-        )
+        ) from e

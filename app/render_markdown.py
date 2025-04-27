@@ -1,6 +1,6 @@
 import pathlib
-import markdown
 
+import markdown
 from fastapi import HTTPException
 from fastapi.responses import HTMLResponse
 
@@ -18,4 +18,4 @@ def render_markdown(markdown_file: pathlib.Path) -> HTMLResponse:
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Failed to convert Markdown: {str(e)}"
-        )
+        ) from e

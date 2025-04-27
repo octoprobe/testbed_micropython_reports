@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from contextlib import contextmanager
 import html
 import io
+from contextlib import contextmanager
+
 from markupsafe import Markup
 
 
