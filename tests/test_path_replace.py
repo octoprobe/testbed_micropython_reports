@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import pytest
 from app.util_path_replace import PathMatch, PathReplace, Segments
+from octoprobe.util_constants import DirectoryTag
 
 
 @pytest.mark.parametrize(
@@ -70,13 +71,13 @@ def test_end_of_path(path: str, pos_expected: int) -> None:
 def test_replace(line: str, line_expected: str) -> None:
     replace = PathReplace(
         directories={
-            "R": "/home/testresults",
-            "T": "/home/worktree/micropython",
+            DirectoryTag.R: "/home/testresults",
+            DirectoryTag.T: "/home/worktree/micropython",
         },
         git_ref={},
         urls={
-            "R": "https://r/",
-            "T": "http://t/",
+            DirectoryTag.R: "https://r/",
+            DirectoryTag.T: "http://t/",
         },
     )
     segments = replace.expand_href(segments=Segments([line]))

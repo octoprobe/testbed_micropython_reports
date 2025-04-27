@@ -1,6 +1,7 @@
 import json
 import pathlib
 
+from octoprobe.util_constants import DirectoryTag
 from testbed_micropython.constants import DIRECTORY_NAME_TESTRESULTS
 from testbed_micropython.testreport.util_testreport import FILENAME_CONTEXT_JSON
 
@@ -29,8 +30,8 @@ def get_path_replace(
         directories=context_json["directories"],
         git_ref=context_json["git_ref"],
         urls={
-            # "R": f"https://reports.octoprobe.org/{directory_testresults.name}",
-            "R": f"/{directory_testresults.name}/{DIRECTORY_NAME_TESTRESULTS}/",
-            "T": "http://t/",
+            # DirectoryTag.R: f"https://reports.octoprobe.org/{directory_testresults.name}",
+            DirectoryTag.R: f"/{directory_testresults.name}/{DIRECTORY_NAME_TESTRESULTS}/",
+            DirectoryTag.T: "http://t/",
         },
     )
