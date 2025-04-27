@@ -13,7 +13,7 @@
                 "app.main:app",
                 "--reload"
             ],
-            "cwd": "${workspaceFolder}/server",
+            "cwd": "${workspaceFolder}",
             "jinja": true
         },
         {
@@ -22,7 +22,7 @@
             "request": "launch",
             "module": "app.parse_logfile",
             "args": [],
-            "cwd": "${workspaceFolder}/server",
+            "cwd": "${workspaceFolder}",
             "jinja": true
         }
     ]

@@ -33,7 +33,7 @@ dependencies = [
     "starlette~=0.41.2",
     "jinja2~=3.1.4",
     "python-multipart~=0.0.17",
-    "markdown~=3.8",
+    "markdown2[all]~=2.5.3",
     "ansi2html~=1.9.2",
 ]
 

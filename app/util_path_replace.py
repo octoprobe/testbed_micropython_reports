@@ -109,7 +109,7 @@ class PathReplace:
         self.git_ref = git_ref
         self.urls = urls
 
-    def expand_href(self, segments: Segments) -> typing.Interable[str | Markup]:
+    def expand_href(self, segments: Segments) -> typing.Iterable[str | Markup]:
         for segment in segments:
             if isinstance(segment, Markup):
                 yield segment
@@ -141,5 +141,5 @@ class PathReplace:
                     break
                 if url == "":
                     return match.line_without_href()
-                return self.expand_href(match.line_with_href(url=url))
+                return Segments(self.expand_href(match.line_with_href(url=url)))
         return Segments(line)
