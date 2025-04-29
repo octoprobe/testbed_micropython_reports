@@ -2,11 +2,11 @@ import logging
 import pathlib
 import re
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 from fastapi.responses import HTMLResponse
 from starlette.datastructures import URL
 
-from app.render_directory_style import STYLESHEET, get_listing_style
+from app.render_directory_style import get_listing_style
 
 from .constants import DIRECTORY_REPORTS
 from .render_ansii_color import render_ansi_color
@@ -49,7 +49,12 @@ def key_number_sort(filename: pathlib.Path | str) -> str:
     return RE_NUMBER.sub(f, filename)
 
 
-def render_directory_or_file(path: str, url: URL, severity: str) -> HTMLResponse:
+def render_directory_or_file(
+    request: Request,
+    path: str,
+    url: URL,
+    severity: str,
+) -> HTMLResponse:
     directory = DIRECTORY_REPORTS / path
 
     # Ensure the directory exists
@@ -133,20 +138,31 @@ def render_directory_or_file(path: str, url: URL, severity: str) -> HTMLResponse
         add_html_file(filename=filename)
 
     # Generate HTML response
-    html_content = f"""
-    <html>
-        <head>
-        <title>Directory Browser</title>
-        <style>
-        {STYLESHEET}
-        </style>
-        </head>
-        <body>
-            <h1>Browsing: {str(directory.relative_to(DIRECTORY_REPORTS))}</h1>
-            <ul>
-                {"".join(html_files)}
-            </ul>
-        </body>
-    </html>
-    """
-    return HTMLResponse(content=html_content)
+    # html_content = f"""
+    # <html>
+    #     <head>
+    #     <title>Directory Browser</title>
+    # <link rel="stylesheet" href="/static/styles.css">
+    #     <style>
+    #     {STYLESHEET}
+    #     </style>
+    #     </head>
+    #     <body>
+    #         <h1>Browsing: {str(directory.relative_to(DIRECTORY_REPORTS))}</h1>
+    #         <ul>
+    #             {"".join(html_files)}
+    #         </ul>
+    #     </body>
+    # </html>
+    # """
+    # return HTMLResponse(content=html_content)
+    from .main import JINJA2_TEMPLATES
+
+    return JINJA2_TEMPLATES.TemplateResponse(
+        "browse.html",
+        {
+            "request": request,
+            "path_relative": str(directory.relative_to(DIRECTORY_REPORTS)),
+            "html_files": html_files,
+        },
+    )

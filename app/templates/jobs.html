@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}
+Octoprobe - testbed_micropython
+{% endblock %}
+
+{% block content %}
+<style>
+  input {
+    width: 100%;
+    border-color: lightgray;
+    border-width: 1px;
+  }
+</style>
+
+
+<h1>mptest jobs</h1>
+<form method="post" action="/jobs/index">
+  <table>
+    <tbody>
+      <tr>
+        <td><label for="username">User name</label></td>
+        <td><input type="text" id="username" name="username" value="{{ Default.USER }}" required></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Known users will receive an email report when <i>mptest</i> is done.</td>
+      </tr>
+      <tr>
+        <td><label for="arguments">Arguments</label></td>
+        <td><input type="text" id="arguments" name="arguments" , value="{{ Default.ARGUMENTS }}">
+        </td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>Optional commandline arguments for <i>mptest</i>.</td>
+      </tr>
+      <tr>
+        <td><label for="repo_tests">Tests</label></td>
+        <td><input type="text" id="repo_tests" name="repo_tests" required, value="{{ Default.REPO_TESTS }}"></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>The repo/branch for the testcode. For example <i>https://github.com/micropython/micropython.git@master</i>.
+        </td>
+      </tr>
+      <tr>
+        <td><label for="repo_firmware">Firmware</label></td>
+        <td><input type="text" id="repo_firmware" name="repo_firmware" value="{{ Default.REPO_FIRMWARE }}"></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>The repo/branch to build the firmware. For example
+          <i>https://github.com/micropython/micropython.git@master</i>.<br />
+          Ignored if <i>PRs</i> is given!
+        </td>
+      </tr>
+      <tr>
+        <td><label for="pullrequests">PRs</label></td>
+        <td><input type="text" id="pullrequests" name="pullrequests"></td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>The PRs to be tested. A comma separated list. For example 17233 for
+          https://github.com/micropython/micropython/pull/17223.</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td>
+          <button type="submit" name="action" value="start">START</button>
+          {%- if form_rc.msg_ok %}
+          <span style="color: green;">{{ form_rc.msg_ok }}</span>
+          {%- endif %}
+          {%- if form_rc.msg_error %}
+          <span style="color: red;">{{ form_rc.msg_error }}</span>
+          {%- endif %}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</form>
+
+<hr/>
+<a href="/jobs/index">Reload</a>
+<table>
+  <thead>
+    <tr>
+      <th>Number</th>
+      <th>Status</th>
+      <th>Conclusion</th>
+      <th>URL</th>
+      <th>Results</th>
+      <th>Started At</th>
+    </tr>
+  </thead>
+  <tbody>
+    {%- for job in gh_jobs %}
+    <tr>
+      <td>{{ job.number }}</td>
+      <td>{{ job.status }}</td>
+      <td>{{ job.conclusion }}</td>
+      <td>
+        <a href="{{ job.url }}" target="_blank">job</a>
+        {%- if job.conclusion %}
+        <a href="/github_testbed_micropython_{{ job.number }}" target="_blank">results</a>
+        {%- endif %}
+      </td>
+      <td>{{ job.createdAt }}</td>
+      <td>{{ job.startedAt }}</td>
+    </tr>
+    {%- endfor %}
+  </tbody>
+</table>
+{%- endblock %}

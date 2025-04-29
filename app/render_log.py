@@ -92,12 +92,12 @@ span.text.INFO {
 
 span.text.WARNING {
     color: darkorange;
-    font-size: "bigger";
+    font-size: larger;
 }
 
 span.text.ERROR {
     color: red;
-    font-size: "bigger";
+    font-size: larger;
 }
 </style>
 """
@@ -115,12 +115,12 @@ span.text.INFO {
 
 span.text.WARNING {
     font-weight: bold;
-    font-size: bigger;
+    font-size: larger;
 }
 
 span.text.ERROR {
     font-weight: bold;
-    font-size: bigger;
+    font-size: larger;
 }
 
 span.text.COLOR_INFO {
@@ -129,7 +129,7 @@ span.text.COLOR_INFO {
 
 span.text.COLOR_FAILED {
     color: orange;
-    font-size: bigger;
+    font-size: larger;
 }
 
 span.text.COLOR_SUCCESS {
@@ -138,7 +138,7 @@ span.text.COLOR_SUCCESS {
 
 span.text.COLOR_ERROR {
     color: red;
-    font-size: bigger;
+    font-size: larger;
 }
 
 </style>

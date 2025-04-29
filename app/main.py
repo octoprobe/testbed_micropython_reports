@@ -1,13 +1,24 @@
 import io
 import logging
 import os
+import pathlib
 import shutil
 import tarfile
+import time
+import typing
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
+from app.util_github import (
+    Default,
+    FormStartJob,
+    ReturncodeStartJob,
+    gh_jobs,
+    gh_start_job,
+)
 
 from .constants import DIRECTORY_REPORTS
 from .render_directory import render_directory_or_file
@@ -17,14 +28,44 @@ logger = logging.Logger(__file__)
 
 app = FastAPI()
 
-templates = Jinja2Templates(
-    directory=os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
-)
+DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
+DIRECTORY_TEMPLATES = DIRECTORY_OF_THIS_FILE / "templates"
+assert DIRECTORY_TEMPLATES.is_dir()
+JINJA2_TEMPLATES = Jinja2Templates(directory=DIRECTORY_TEMPLATES)
 
 
 @app.get("/index")
 def read_root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return JINJA2_TEMPLATES.TemplateResponse("index.html", {"request": request})
+
+
+def _jobs_response(request: Request, form_rc: ReturncodeStartJob) -> HTMLResponse:
+    jobs = gh_jobs()
+    return JINJA2_TEMPLATES.TemplateResponse(
+        "jobs.html",
+        {
+            "request": request,
+            "Default": Default,
+            "gh_jobs": jobs,
+            "form_rc": form_rc,
+        },
+    )
+
+
+@app.get("/jobs/index")
+def jobs_index_get(request: Request):
+    return _jobs_response(request=request, form_rc=ReturncodeStartJob())
+
+
+@app.post("/jobs/index")
+def jobs_index_post(
+    request: Request, form_startjob: typing.Annotated[FormStartJob, Form()]
+):
+    form_rc = gh_start_job(form_startjob=form_startjob)
+    if form_rc.msg_error is not None:
+        # It typically takes some time till the new job appears in the list
+        time.sleep(1.0)
+    return _jobs_response(request=request, form_rc=form_rc)
 
 
 @app.post("/upload")
@@ -95,4 +136,6 @@ async def browse_directory(
     Custom endpoint to browse the 'uploads' directory and list files.
     """
     url = request.url_for("browse_directory", path=path)
-    return render_directory_or_file(path=path, url=url, severity=severity)
+    return render_directory_or_file(
+        request=request, path=path, url=url, severity=severity
+    )

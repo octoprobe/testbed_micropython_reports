@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}
+Octoprobe - testbed_micropython
+{% endblock %}
+
+{% block content %}
+<h1>Browsing: {{ path_relative }}</h1>
+<ul>
+  {%- for html_file in html_files %}
+  {{ html_file | safe }}
+  {%- endfor %}
+</ul>
+{% endblock %}

@@ -2,8 +2,6 @@ import enum
 import pathlib
 import re
 
-STYLESHEET = pathlib.Path(__file__).with_suffix(".css").read_text()
-
 
 class ListingStyle(enum.StrEnum):
     GRAY = "gray"

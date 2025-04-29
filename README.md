@@ -64,3 +64,14 @@ docker run --rm -it --ip6 2a00:1169:110:49c0:: -p 80:8000 octoprobe-testbed_micr
 ==> listen tcp4 0.0.0.0:80: bind: address already in use.
 ```
 ==> could not make v6 docker container visible to the world...
+
+
+## Run docker and `gh`
+
+```bash
+source .env
+docker run --rm -it \
+-e GH_TOKEN=$GH_TOKEN \
+octoprobe-testbed_micropython-fastapi:latest \
+sh -c 'gh run list --repo=octoprobe/testbed_micropython_runner --workflow=testbed_micropython --status completed --json name,number,status,url'
+```
