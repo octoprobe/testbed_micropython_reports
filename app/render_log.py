@@ -91,7 +91,7 @@ span.text.INFO {
 }
 
 span.text.WARNING {
-    color: orange;
+    color: darkorange;
     font-size: "bigger";
 }
 

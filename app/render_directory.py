@@ -74,19 +74,26 @@ def render_directory_or_file(path: str, url: URL, severity: str) -> HTMLResponse
         media_type = {
             ".html": "text/html",
             ".txt": "text/plain",
-            ".spec": "text/plain",
+            # ".spec": "text/plain",
             ".json": "text/json",
         }.get(directory.suffix, None)
         if media_type is None:
-            return HTMLResponse(
-                content=directory.read_bytes(),
-                media_type="application/octet-stream",
-                headers={
-                    "Content-Disposition": f"attachment; filename={directory.name}"
-                },
-            )
-        content = directory.read_text()
-        return HTMLResponse(content=content, media_type=media_type)
+            content_bytes = directory.read_bytes()
+            try:
+                # Try if it is an ascii file
+                content_bytes.decode("ascii")
+                media_type = "text/plain"
+            except UnicodeDecodeError:
+                # No ascii: It is a binary file to be downloaded
+                return HTMLResponse(
+                    content=content_bytes,
+                    media_type="application/octet-stream",
+                    headers={
+                        "Content-Disposition": f"attachment; filename={directory.name}"
+                    },
+                )
+        content_text = directory.read_text()
+        return HTMLResponse(content=content_text, media_type=media_type)
 
     # List files and directories
     files = sorted(directory.glob("*"), key=key_number_sort, reverse=True)
