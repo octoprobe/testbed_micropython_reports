@@ -1,3 +1,40 @@
+# gh api users/hmaerki
+gh_users_hmaerki = {
+    "login": "hmaerki",
+    "id": 8708771,
+    "node_id": "MDQ6VXNlcjg3MDg3NzE=",
+    "avatar_url": "https://avatars.githubusercontent.com/u/8708771?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/hmaerki",
+    "html_url": "https://github.com/hmaerki",
+    "followers_url": "https://api.github.com/users/hmaerki/followers",
+    "following_url": "https://api.github.com/users/hmaerki/following{/other_user}",
+    "gists_url": "https://api.github.com/users/hmaerki/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/hmaerki/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/hmaerki/subscriptions",
+    "organizations_url": "https://api.github.com/users/hmaerki/orgs",
+    "repos_url": "https://api.github.com/users/hmaerki/repos",
+    "events_url": "https://api.github.com/users/hmaerki/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/hmaerki/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": False,
+    "name": "Hans Märki",
+    "company": "Märki Informatik",
+    "blog": "www.maerki.com",
+    "location": "Switzerland",
+    "email": "buhtig.hans.maerki@ergoinfo.ch",
+    "hireable": None,
+    "bio": None,
+    "twitter_username": None,
+    "public_repos": 82,
+    "public_gists": 0,
+    "followers": 6,
+    "following": 2,
+    "created_at": "2014-09-09T11:37:47Z",
+    "updated_at": "2025-04-10T10:48:34Z",
+}
+
 # gh run list --repo=octoprobe/testbed_micropython_runner --workflow=testbed_micropython --status in_progress --json name,number,status,conclusion,url,event,createdAt,startedAt
 gh_progress = [
     {

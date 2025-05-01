@@ -20,12 +20,25 @@ class Default(enum.StrEnum):
     REPO_FIRMWARE = "https://github.com/micropython/micropython.git@master"
 
 
+def subprocess_json(args: list[str]) -> dict | list:
+    try:
+        result = subprocess.run(args=args, capture_output=True, text=True, check=True)
+        data = json.loads(result.stdout)
+        return data
+    except subprocess.CalledProcessError as e:
+        print(f"Error executing command: {e}")
+        raise
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON: {e}")
+        raise
+
+
 def gh_jobs() -> list[dict[str, str | int]]:
     if MOCKED_GITHUB_RESULTS:
         return [
             *util_github_mockdata.gh_queued,  # type: ignore[list-item]
-            *util_github_mockdata.gh_progress, # type: ignore[list-item]
-            *util_github_mockdata.gh_completed, # type: ignore[list-item]
+            *util_github_mockdata.gh_progress,  # type: ignore[list-item]
+            *util_github_mockdata.gh_completed,  # type: ignore[list-item]
         ]
 
     # Provoke errors if the environment variable is NOT defined
@@ -45,17 +58,30 @@ def gh_jobs() -> list[dict[str, str | int]]:
             "name,number,status,conclusion,url,event,createdAt,startedAt",
         ]
 
-        try:
-            result = subprocess.run(
-                args=args, capture_output=True, text=True, check=True
-            )
-            data = json.loads(result.stdout)
-            list_result.extend(data)
-        except subprocess.CalledProcessError as e:
-            print(f"Error executing command: {e}")
-        except json.JSONDecodeError as e:
-            print(f"Error decoding JSON: {e}")
+        data = subprocess_json(args=args)
+        list_result.extend(data)
     return list_result
+
+
+def gh_resolve_email(username: str) -> str | None:
+    if username == "":
+        return None
+
+    def get_result() -> dict | list:
+        if MOCKED_GITHUB_RESULTS:
+            return util_github_mockdata.gh_users_hmaerki
+
+        args = [
+            "gh",
+            "api",
+            f"users/{username}",
+        ]
+
+        return subprocess_json(args=args)
+
+    data = get_result()
+    assert isinstance(data, dict)
+    return data.get("email", None)
 
 
 class FormStartJob(BaseModel):
@@ -73,9 +99,19 @@ class ReturncodeStartJob(BaseModel):
 
 def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
     form_rc = ReturncodeStartJob()
+
     if form_startjob.username == Default.USER:
         form_rc.msg_error = "Skipped: User unknown..."
         return form_rc
+
+    email_testreport = ""
+    if form_startjob.username != "":
+        email_testreport = gh_resolve_email(form_startjob.username)
+        if email_testreport is None:
+            form_rc.msg_error = (
+                f"Could not resolve email address for '{form_startjob.username}'!"
+            )
+            return form_rc
 
     args = [
         "gh",
@@ -90,15 +126,18 @@ def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
         "--field",
         f"repo_tests={form_startjob.repo_tests}",
         "--field",
-        f"username='{form_startjob.username}'",
+        f"email_testreport='{email_testreport}'",
         "--field",
         f"pullrequests='{form_startjob.pullrequests}'",
     ]
 
     try:
-        _result = subprocess.run(args=args, capture_output=True, text=True, check=True)
-        # data = json.loads(result.stdout)
-        # list_result.extend(data)
+        _result = subprocess.run(
+            args=args,
+            capture_output=True,
+            text=True,
+            check=True,
+        )
     except subprocess.CalledProcessError as e:
         form_rc.msg_error = f"Error executing command: {e}"
         return form_rc

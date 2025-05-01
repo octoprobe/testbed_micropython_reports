@@ -24,7 +24,7 @@ Octoprobe - testbed_micropython
       </tr>
       <tr>
         <td></td>
-        <td>Known users will receive an email report when <i>mptest</i> is done.</td>
+        <td>Valid github user which will receive the testresults by email.</td>
       </tr>
       <tr>
         <td><label for="arguments">Arguments</label></td>
@@ -67,7 +67,8 @@ Octoprobe - testbed_micropython
       <tr>
         <td></td>
         <td>
-          <button type="submit" name="action" value="start">START</button>
+            <button type="submit" name="action" value="start" 
+                onclick="this.innerHTML='START ⏳'; this.style.cursor='wait';">START</button>
           {%- if form_rc.msg_ok %}
           <span style="color: green;">{{ form_rc.msg_ok }}</span>
           {%- endif %}
