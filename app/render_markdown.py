@@ -11,7 +11,7 @@ def render_markdown(markdown_file: pathlib.Path) -> HTMLResponse:
         markdown_content = markdown_file.read_text(encoding="utf-8")
 
         # Convert Markdown to HTML
-        html_content = markdown2html(markdown_content)
+        html_content = markdown2html(markdown_content, title=markdown_file.name)
 
         # Return the HTML content
         return HTMLResponse(content=html_content)

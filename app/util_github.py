@@ -89,7 +89,6 @@ class FormStartJob(BaseModel):
     arguments: str | None
     repo_tests: str | None
     repo_firmware: str | None
-    pullrequests: str | None
 
 
 class ReturncodeStartJob(BaseModel):
@@ -104,7 +103,7 @@ def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
         form_rc.msg_error = "Skipped: User unknown..."
         return form_rc
 
-    email_testreport = ""
+    email_testreport: str | None = ""
     if form_startjob.username != "":
         email_testreport = gh_resolve_email(form_startjob.username)
         if email_testreport is None:
@@ -127,8 +126,6 @@ def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
         f"repo_tests={form_startjob.repo_tests}",
         "--field",
         f"email_testreport='{email_testreport}'",
-        "--field",
-        f"pullrequests='{form_startjob.pullrequests}'",
     ]
 
     try:

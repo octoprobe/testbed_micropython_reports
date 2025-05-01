@@ -13,8 +13,17 @@ Octoprobe - testbed_micropython
   }
 </style>
 
-
 <h1>mptest jobs</h1>
+
+<p><a href="/jobs/index">Reload this page ...takes a few seconds...</a></p>
+
+<div style="border: 1px solid lightblue; background-color: #f0f8ff; padding: 10px; margin-bottom: 20px;">
+  <strong>Syntax for 'Tests' and 'Firmware':</strong><br/>
+  https://github.com/micropython/micropython.git@1.25.0 <strong>Checkout 'v1.25.0' (might be branch/hash/tag).</strong><br/>
+  https://github.com/micropython/micropython.git+17232 <strong>Checkout PR '17232'. Valid PR numbers may be found <a href="https://github.com/micropython/micropython/pulls" target="_blank">here</a>.</strong><br/>
+  https://github.com/micropython/micropython.git+17232@1.25.0 <strong>Checkout PR '17232' and try to rebase on 'v1.25.0'.</strong><br/>
+</div>
+
 <form method="post" action="/jobs/index">
   <table>
     <tbody>
@@ -56,10 +65,6 @@ Octoprobe - testbed_micropython
         </td>
       </tr>
       <tr>
-        <td><label for="pullrequests">PRs</label></td>
-        <td><input type="text" id="pullrequests" name="pullrequests"></td>
-      </tr>
-      <tr>
         <td></td>
         <td>The PRs to be tested. A comma separated list. For example 17233 for
           https://github.com/micropython/micropython/pull/17223.</td>
@@ -82,7 +87,6 @@ Octoprobe - testbed_micropython
 </form>
 
 <hr/>
-<a href="/jobs/index">Reload</a>
 <table>
   <thead>
     <tr>
