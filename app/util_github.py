@@ -85,15 +85,15 @@ def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
         "testbed_micropython.yml",
         "--repo=octoprobe/testbed_micropython_runner",
         "--field",
-        f"aux={form_startjob.arguments}",
+        f"arguments={form_startjob.arguments}",
         "--field",
         f"repo_firmware={form_startjob.repo_firmware}",
         "--field",
         f"repo_tests={form_startjob.repo_tests}",
-        # "--field",
-        # f"username='{form_startjob.username}'",
-        # "--field",
-        # f"pullrequests='{form_startjob.pullrequests}'",
+        "--field",
+        f"username='{form_startjob.username}'",
+        "--field",
+        f"pullrequests='{form_startjob.pullrequests}'",
     ]
 
     try:

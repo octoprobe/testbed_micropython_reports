@@ -16,7 +16,6 @@
             "cwd": "${workspaceFolder}",
             "env": {
                 "DIRECTORY_REPORTS": "${workspaceFolder}/reports",
-                "EMAIL_USERS": "hmaerki,dpgeorge,jimmo,agatti,projectgus,Josverl,mattytrentini,jepler,andrewleech,hathach"
             },
             "envFile": "${workspaceFolder}/.env",
             "jinja": true
