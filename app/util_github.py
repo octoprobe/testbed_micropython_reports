@@ -21,16 +21,15 @@ class Default(enum.StrEnum):
 
 
 def gh_jobs() -> list[dict[str, str | int]]:
-    """ """
     if MOCKED_GITHUB_RESULTS:
         return [
-            *util_github_mockdata.gh_queued,
-            *util_github_mockdata.gh_progress,
-            *util_github_mockdata.gh_completed,
+            *util_github_mockdata.gh_queued,  # type: ignore[list-item]
+            *util_github_mockdata.gh_progress, # type: ignore[list-item]
+            *util_github_mockdata.gh_completed, # type: ignore[list-item]
         ]
 
     # Provoke errors if the environment variable is NOT defined
-    os.environ["GH_TOKEN"]
+    _ = os.environ["GH_TOKEN"]
 
     list_result: list[dict[str, str | int]] = []
     for status in ("queued", "in_progress", "completed"):

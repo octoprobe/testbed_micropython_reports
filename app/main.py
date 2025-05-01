@@ -1,6 +1,5 @@
 import io
 import logging
-import os
 import pathlib
 import shutil
 import tarfile
