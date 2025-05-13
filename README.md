@@ -75,3 +75,9 @@ docker run --rm -it \
 octoprobe-testbed_micropython-fastapi:latest \
 sh -c 'gh run list --repo=octoprobe/testbed_micropython_runner --workflow=testbed_micropython --status completed --json name,number,status,url'
 ```
+
+## Download testresults
+
+```bash
+ssh www-data@www.maerki.com tar zcf - -C /home/www/docker-octoprobe reports | tar xzf -
+```
