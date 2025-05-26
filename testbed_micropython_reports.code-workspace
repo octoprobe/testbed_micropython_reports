@@ -4,13 +4,13 @@
 			"path": "."
 		},
 		{
-			"path": "../work_octoprobe_testbed_micropython"
+			"path": "../testbed_micropython"
 		},
 		{
-			"path": "../work_octoprobe_octoprobe"
+			"path": "../octoprobe"
 		}
 	],
-"settings": {
+	"settings": {
 		"[python]": {
 			"editor.formatOnSave": true,
 			"editor.defaultFormatter": "charliermarsh.ruff"
@@ -33,4 +33,5 @@
 			"charliermarsh.ruff",
 			"ms-python.python",
 		]
-	}}
+	}
+}

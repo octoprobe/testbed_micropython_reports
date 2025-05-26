@@ -66,6 +66,17 @@ docker run --rm -it --ip6 2a00:1169:110:49c0:: -p 80:8000 octoprobe-testbed_micr
 ==> could not make v6 docker container visible to the world...
 
 
+## GH_TOKEN
+
+* github organization -> github settings page -> Third-party Access -> Personal access tokens -> Active tokens
+
+Create token
+* octoprobe_workflow
+* Read access to organization events
+* Read and Write access to organization self hosted runners
+* Read access to metadata
+* Read and Write access to actions, pull requests, and workflows
+
 ## Run docker and `gh`
 
 ```bash
@@ -73,7 +84,7 @@ source .env
 docker run --rm -it \
 -e GH_TOKEN=$GH_TOKEN \
 octoprobe-testbed_micropython-fastapi:latest \
-sh -c 'gh run list --repo=octoprobe/testbed_micropython_runner --workflow=testbed_micropython --status completed --json name,number,status,url'
+sh -c 'gh run list --repo=octoprobe/testbed_micropython --workflow=selfhosted_testrun --status completed --json name,number,status,url'
 ```
 
 ## Download testresults

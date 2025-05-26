@@ -35,7 +35,7 @@ gh_users_hmaerki = {
     "updated_at": "2025-04-10T10:48:34Z",
 }
 
-# gh run list --repo=octoprobe/testbed_micropython_runner --workflow=testbed_micropython --status in_progress --json name,number,status,conclusion,url,event,createdAt,startedAt
+# gh run list --repo=octoprobe/testbed_micropython --workflow=selfhosted_testrun --status in_progress --json name,number,status,conclusion,url,event,createdAt,startedAt
 gh_progress = [
     {
         "conclusion": "",
@@ -45,10 +45,10 @@ gh_progress = [
         "number": 125,
         "startedAt": "2025-04-30T08:24:55Z",
         "status": "in_progress",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14750132324",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14750132324",
     }
 ]
-# gh run list --repo=octoprobe/testbed_micropython_runner --workflow=testbed_micropython --status queued --json name,number,status,conclusion,url,event,createdAt,startedAt
+# gh run list --repo=octoprobe/testbed_micropython --workflow=selfhosted_testrun --status queued --json name,number,status,conclusion,url,event,createdAt,startedAt
 gh_queued = [
     {
         "conclusion": "",
@@ -58,7 +58,7 @@ gh_queued = [
         "number": 127,
         "startedAt": "2025-04-30T08:25:18Z",
         "status": "queued",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14750140112",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14750140112",
     },
     {
         "conclusion": "",
@@ -68,11 +68,11 @@ gh_queued = [
         "number": 126,
         "startedAt": "2025-04-30T08:25:08Z",
         "status": "queued",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14750136286",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14750136286",
     },
 ]
 
-# gh run list --repo=octoprobe/testbed_micropython_runner --workflow=testbed_micropython --status completed --json name,number,status,conclusion,url,event,createdAt,startedAt
+# gh run list --repo=octoprobe/testbed_micropython --workflow=selfhosted_testrun --status completed --json name,number,status,conclusion,url,event,createdAt,startedAt
 gh_completed = [
     {
         "conclusion": "success",
@@ -82,7 +82,7 @@ gh_completed = [
         "number": 124,
         "startedAt": "2025-04-30T06:00:54Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14747775291",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14747775291",
     },
     {
         "conclusion": "success",
@@ -92,7 +92,7 @@ gh_completed = [
         "number": 123,
         "startedAt": "2025-04-30T03:08:36Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14745842803",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14745842803",
     },
     {
         "conclusion": "success",
@@ -102,7 +102,7 @@ gh_completed = [
         "number": 122,
         "startedAt": "2025-04-30T02:30:30Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14745422847",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14745422847",
     },
     {
         "conclusion": "success",
@@ -112,7 +112,7 @@ gh_completed = [
         "number": 121,
         "startedAt": "2025-04-29T21:17:57Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14741519802",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14741519802",
     },
     {
         "conclusion": "success",
@@ -122,7 +122,7 @@ gh_completed = [
         "number": 120,
         "startedAt": "2025-04-29T19:38:06Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14739857583",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14739857583",
     },
     {
         "conclusion": "success",
@@ -132,7 +132,7 @@ gh_completed = [
         "number": 119,
         "startedAt": "2025-04-29T18:33:29Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14738725875",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14738725875",
     },
     {
         "conclusion": "success",
@@ -142,7 +142,7 @@ gh_completed = [
         "number": 117,
         "startedAt": "2025-04-29T15:15:17Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14734877542",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14734877542",
     },
     {
         "conclusion": "success",
@@ -152,7 +152,7 @@ gh_completed = [
         "number": 116,
         "startedAt": "2025-04-29T11:27:33Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14730108622",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14730108622",
     },
     {
         "conclusion": "success",
@@ -162,7 +162,7 @@ gh_completed = [
         "number": 115,
         "startedAt": "2025-04-28T18:35:55Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14715229526",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14715229526",
     },
     {
         "conclusion": "success",
@@ -172,7 +172,7 @@ gh_completed = [
         "number": 114,
         "startedAt": "2025-04-28T10:58:41Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14706101101",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14706101101",
     },
     {
         "conclusion": "success",
@@ -182,7 +182,7 @@ gh_completed = [
         "number": 113,
         "startedAt": "2025-04-28T07:12:16Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14702360822",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14702360822",
     },
     {
         "conclusion": "success",
@@ -192,7 +192,7 @@ gh_completed = [
         "number": 112,
         "startedAt": "2025-04-28T07:08:23Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14702304995",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14702304995",
     },
     {
         "conclusion": "success",
@@ -202,7 +202,7 @@ gh_completed = [
         "number": 110,
         "startedAt": "2025-04-28T06:30:14Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14701733029",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14701733029",
     },
     {
         "conclusion": "success",
@@ -212,7 +212,7 @@ gh_completed = [
         "number": 109,
         "startedAt": "2025-04-27T22:05:30Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14696563766",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14696563766",
     },
     {
         "conclusion": "success",
@@ -222,7 +222,7 @@ gh_completed = [
         "number": 108,
         "startedAt": "2025-04-27T21:32:56Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14696322114",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14696322114",
     },
     {
         "conclusion": "success",
@@ -232,7 +232,7 @@ gh_completed = [
         "number": 107,
         "startedAt": "2025-04-27T16:49:38Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14694163331",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14694163331",
     },
     {
         "conclusion": "success",
@@ -242,7 +242,7 @@ gh_completed = [
         "number": 106,
         "startedAt": "2025-04-26T20:56:56Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14685026626",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14685026626",
     },
     {
         "conclusion": "success",
@@ -252,7 +252,7 @@ gh_completed = [
         "number": 105,
         "startedAt": "2025-04-26T20:27:01Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14684821202",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14684821202",
     },
     {
         "conclusion": "success",
@@ -262,7 +262,7 @@ gh_completed = [
         "number": 104,
         "startedAt": "2025-04-26T20:24:15Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14684800562",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14684800562",
     },
     {
         "conclusion": "success",
@@ -272,6 +272,6 @@ gh_completed = [
         "number": 103,
         "startedAt": "2025-04-26T20:21:35Z",
         "status": "completed",
-        "url": "https://github.com/octoprobe/testbed_micropython_runner/actions/runs/14684778833",
+        "url": "https://github.com/octoprobe/testbed_micropython/actions/runs/14684778833",
     },
 ]
