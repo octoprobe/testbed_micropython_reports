@@ -11,9 +11,9 @@ This is base from https://github.com/aws-samples/python-fastapi-demo-docker.
 ## Run locally as a developer
 
 ```bash
-uv venv --python 3.13.3 .venv
+uv venv --python 3.13.3
 source .venv/bin/activate
-uv pip install -e .
+uv pip install --upgrade -e .
 ``` 
 
 ## Installation
