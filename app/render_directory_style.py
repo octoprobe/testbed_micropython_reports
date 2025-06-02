@@ -23,7 +23,7 @@ LIST_RE_2_STYLE = [
     # Directories
     (re.compile(r"/RUN-[^/]+$"), ListingStyle.GREEN),
     (re.compile(r"/testresults$"), ListingStyle.GREEN),
-    (re.compile(r"^github_testbed_micropython_\d+$"), ListingStyle.GREEN),
+    (re.compile(r"^github_(.+?)_\d+$"), ListingStyle.GREEN),
     # Logfiles
     (re.compile(r"/journalctl.txt$"), ListingStyle.BLACK),
     (re.compile(r"/logger_20_info.log$"), ListingStyle.GREEN),

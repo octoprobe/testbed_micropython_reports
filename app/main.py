@@ -75,7 +75,7 @@ async def upload_tar_file(
     """
     Endpoint to upload a tar file via HTTPS POST.
 
-    curl -X POST -F "label=github_testbed_micropython_107" -F "file=@/home/maerki/Downloads/testresults/github_testbed_micropython_107.tgz" -k http://localhost:8000/upload
+    curl -X POST -F "label=github_selfhosted_testrun_107" -F "file=@/home/maerki/Downloads/testresults/github_selfhosted_testrun_107.tgz" -k http://localhost:8000/upload
 
     curl -X POST -F "label=ch_hans_1-2025-04-22_12-33-22" -F "file=@/home/maerki/work_octoprobe_testbed_micropython/results_yoga_2025-04-21b.tgz" -k https://reports.octoprobe.org/upload
 
