@@ -7,6 +7,10 @@ ul {
     list-style-type: none;
 }
 
+th {
+    text-align: left;
+}
+
 /*
 a.file {
     color: black;

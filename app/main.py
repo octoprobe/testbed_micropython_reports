@@ -18,6 +18,7 @@ from app.util_github import (
     gh_jobs,
     gh_start_job,
 )
+from app.util_github2 import gh_list, render_reports
 
 from .constants import DIRECTORY_REPORTS
 from .render_directory import render_directory_or_file
@@ -31,6 +32,27 @@ DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
 DIRECTORY_TEMPLATES = DIRECTORY_OF_THIS_FILE / "templates"
 assert DIRECTORY_TEMPLATES.is_dir()
 JINJA2_TEMPLATES = Jinja2Templates(directory=DIRECTORY_TEMPLATES)
+
+
+@app.get("/mock/gh_list")
+def mock_gh_list(request: Request):
+    gh_list()
+    return "done"
+
+
+@app.get("/reports")
+def reports(request: Request, read_github: bool = False):
+    if read_github:
+        gh_list()
+
+    workflow_reports = render_reports()
+    return JINJA2_TEMPLATES.TemplateResponse(
+        "reports.html",
+        {
+            "request": request,
+            "workflow_reports": workflow_reports,
+        },
+    )
 
 
 @app.get("/index")

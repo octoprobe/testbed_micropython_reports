@@ -15,12 +15,14 @@ from .render_markdown import render_markdown
 
 logger = logging.Logger(__file__)
 
+# TODO: Obsolete
 RE_NUMBER = re.compile(r"((?P<number>\d+)|(?P<text>^\d+))")
 """
 "testresults_100" -> "testresults_", "100"
 """
 
 
+# TODO: Obsolete
 def key_number_sort(filename: pathlib.Path | str) -> str:
     """
     Example:

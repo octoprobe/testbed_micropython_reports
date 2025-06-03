@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}
+Octoprobe - testbed_micropython
+{% endblock %}
+
+{% block content %}
+<h1>Reports</h1>
+<table>
+    <thead>
+        <tr>
+            <th>github #<br />conclusion</th>
+            <th>started<br />duration</th>
+            <th>repo tests<br />repo firmware</th>
+            <th>email<br />mptest arguments</th>
+        </tr>
+    </thead>
+    <tbody>
+        {%- for workflow_report in workflow_reports %}
+        <tr>
+            <td>
+                {{ workflow_report.github_action_markup }}<br />
+                {{ workflow_report.conclusion_status_markup }}
+            </td>
+            <td>
+                {{ workflow_report.job.started_at_markup }}<br />
+                {{ workflow_report.job.duration_markup }}
+            </td>
+            <td>
+                {{ workflow_report.input.repo_tests_markup }}<br />
+                {{ workflow_report.input.repo_firmware_markup }}
+            </td>
+            <td>
+                {{ workflow_report.input.email_testreport }}<br />
+                {{ workflow_report.input.arguments }}
+            </td>
+        </tr>
+        {%- endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

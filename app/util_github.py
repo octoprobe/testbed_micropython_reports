@@ -5,6 +5,8 @@ import subprocess
 
 from pydantic import BaseModel
 
+from app.constants import GITHUB_EVENT, GITHUB_REPO, GITHUB_WORKFLOW
+
 from . import util_github_mockdata
 
 MOCKED_GITHUB_RESULTS = False
@@ -50,8 +52,9 @@ def gh_jobs() -> list[dict[str, str | int]]:
             "gh",
             "run",
             "list",
-            "--repo=octoprobe/testbed_micropython",
-            "--workflow=selfhosted_testrun",
+            f"--repo={GITHUB_REPO}",
+            f"--workflow={GITHUB_WORKFLOW}",
+            f"--event={GITHUB_EVENT}",
             "--status",
             status,
             "--json",
@@ -61,6 +64,36 @@ def gh_jobs() -> list[dict[str, str | int]]:
         data = subprocess_json(args=args)
         list_result.extend(data)
     return list_result
+
+
+def gh_list2() -> list[dict[str, str | int]]:
+    # TODO: Add mocked results
+    if MOCKED_GITHUB_RESULTS:
+        # TODO
+        return [
+            *util_github_mockdata.gh_queued,  # type: ignore[list-item]
+            *util_github_mockdata.gh_progress,  # type: ignore[list-item]
+            *util_github_mockdata.gh_completed,  # type: ignore[list-item]
+        ]
+
+    # Provoke errors if the environment variable is NOT defined
+    _ = os.environ["GH_TOKEN"]
+
+    args = [
+        "gh",
+        "run",
+        "list",
+        f"--repo={GITHUB_REPO}",
+        f"--workflow={GITHUB_WORKFLOW}",
+        f"--event={GITHUB_EVENT}",
+        "--json",
+        # "name,number,status,conclusion,url,event,createdAt,startedAt",
+        "attempt,conclusion,createdAt,event,name,number,startedAt,status,updatedAt,url",
+    ]
+
+    data = subprocess_json(args=args)
+    assert isinstance(data, list)
+    return data
 
 
 def gh_resolve_email(username: str) -> str | None:
