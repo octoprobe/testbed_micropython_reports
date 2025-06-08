@@ -17,7 +17,7 @@ from app.constants import (
     GITHUB_PREFIX,
     GITHUB_WORKFLOW,
 )
-from app.util_github import gh_list2
+from app.util_github import FormStartJob, gh_list2
 
 
 @dataclasses.dataclass(slots=True)
@@ -49,6 +49,25 @@ class WorkflowInput:
         return Markup(f'<a href="{git_spec.url_link}" target="_blank">{git_ref}</a>')
 
 
+def save_as_workflow_input(
+    form_startjob: FormStartJob,
+    directory_metadata: pathlib.Path,
+) -> None:
+    def space(text: str | None) -> str:
+        return "" if text is None else text
+
+    workflow_input = WorkflowInput(
+        arguments=space(form_startjob.arguments),
+        email_testreport=form_startjob.username,
+        repo_firmware=space(form_startjob.repo_firmware),
+        repo_tests=space(form_startjob.repo_tests),
+    )
+    json_text = json.dumps(dataclasses.asdict(workflow_input), indent=4, sort_keys=True)
+    filename = directory_metadata / FILENAME_INPUTS_JSON
+    filename.parent.mkdir(parents=True, exist_ok=True)
+    filename.write_text(json_text)
+
+
 @dataclasses.dataclass(slots=True)
 class WorkflowJob:
     attempt: int
@@ -63,11 +82,11 @@ class WorkflowJob:
     "Example: selfhosted_testrun"
     number: int
     "Example: 4"
-    startedAt: str # pylint: disable=invalid-name
+    startedAt: str  # pylint: disable=invalid-name
     "Example: 2025-05-27T02:00:25Z"
     status: str
     "Example: completed"
-    updatedAt: str # pylint: disable=invalid-name
+    updatedAt: str  # pylint: disable=invalid-name
     "Example: 2025-05-27T04:01:16Z"
     url: str
     "Example: https://github.com/octoprobe/testbed_micropython/actions/runs/15265040909"
@@ -115,11 +134,22 @@ class WorkflowJob:
 
     @property
     def base_directory(self) -> str:
+        return self.static_base_directory(name=self.name, number=self.number)
         return f"{GITHUB_PREFIX}{self.name}_{self.number}"
+
+    @classmethod
+    def static_base_directory(cls, name: str, number: int) -> str:
+        return f"{GITHUB_PREFIX}{name}_{number}"
 
     @property
     def directory_metadata(self) -> pathlib.Path:
-        return DIRECTORY_REPORTS_METADATA / self.base_directory
+        return self.static_directory_metadata(name=self.name, number=self.number)
+
+    @classmethod
+    def static_directory_metadata(cls, name: str, number: int) -> pathlib.Path:
+        return DIRECTORY_REPORTS_METADATA / cls.static_base_directory(
+            name=name, number=number
+        )
 
 
 class BaseDirectory:
@@ -178,8 +208,15 @@ class WorkflowReport:
                 workflow_job = WorkflowJob(**json_dict)
             except FileNotFoundError as e:
                 raise FileNotFoundError(f"{gh_list_json}: {e}") from e
+            except Exception as e:
+                raise Exception(f"{gh_list_json}: {e}") from e
 
         inputs_json = DIRECTORY_REPORTS / base_directory / FILENAME_INPUTS_JSON
+        if not inputs_json.is_file():
+            # Metadata fallback
+            inputs_json = (
+                DIRECTORY_REPORTS_METADATA / base_directory / FILENAME_INPUTS_JSON
+            )
         if inputs_json.is_file():
             try:
                 json_text = inputs_json.read_text()
@@ -187,6 +224,8 @@ class WorkflowReport:
                 workflow_input = WorkflowInput(**json_dict)
             except FileNotFoundError as e:
                 raise FileNotFoundError(f"{inputs_json}: {e}") from e
+            except Exception as e:
+                raise Exception(f"{inputs_json}: {e}") from e
         return WorkflowReport(
             base_directory=BaseDirectory(base_directory=base_directory),
             job=workflow_job,
@@ -217,15 +256,25 @@ class WorkflowReport:
         )
 
 
-def gh_list():
+def gh_list() -> pathlib.Path | None:
+    """
+    Saves the state of each job in 'directory_metadata / FILENAME_GH_LIST_JSON'.
+    Returns directory_metadata for the next job beeing started.
+    """
+    next_directory_metadata: pathlib.Path | None = None
     jobs = gh_list2()
     for json_job in jobs:
-        worflow_job = WorkflowJob(**json_job)
-
+        workflow_job = WorkflowJob(**json_job)
+        if next_directory_metadata is None:
+            next_directory_metadata = WorkflowJob.static_directory_metadata(
+                name=workflow_job.name, number=workflow_job.number + 1
+            )
         json_text = json.dumps(json_job, indent=4, sort_keys=True)
-        filename = worflow_job.directory_metadata / FILENAME_GH_LIST_JSON
+        filename = workflow_job.directory_metadata / FILENAME_GH_LIST_JSON
         filename.parent.mkdir(parents=True, exist_ok=True)
         filename.write_text(json_text)
+
+    return next_directory_metadata
 
 
 def render_reports() -> list:

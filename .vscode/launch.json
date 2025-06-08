@@ -18,6 +18,7 @@
                 "DIRECTORY_REPORTS": "${workspaceFolder}/reports",
             },
             "envFile": "${workspaceFolder}/.env",
+            "justMyCode": false,
             "jinja": true
         },
         {

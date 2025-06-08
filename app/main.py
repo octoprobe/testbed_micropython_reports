@@ -18,7 +18,7 @@ from app.util_github import (
     gh_jobs,
     gh_start_job,
 )
-from app.util_github2 import gh_list, render_reports
+from app.util_github2 import gh_list, render_reports, save_as_workflow_input
 
 from .constants import DIRECTORY_REPORTS
 from .render_directory import render_directory_or_file
@@ -82,10 +82,18 @@ def jobs_index_get(request: Request):
 def jobs_index_post(
     request: Request, form_startjob: typing.Annotated[FormStartJob, Form()]
 ):
+    # Need to examine which will be the next job number
+    next_directory_metadata = gh_list()
+    if next_directory_metadata is not None:
+        save_as_workflow_input(
+            form_startjob=form_startjob,
+            directory_metadata=next_directory_metadata,
+        )
     form_rc = gh_start_job(form_startjob=form_startjob)
     if form_rc.msg_error is not None:
         # It typically takes some time till the new job appears in the list
-        time.sleep(1.0)
+        # time.sleep(2.0)
+        pass
     return _jobs_response(request=request, form_rc=form_rc)
 
 
