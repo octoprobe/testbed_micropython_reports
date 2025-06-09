@@ -13,15 +13,27 @@ Octoprobe - testbed_micropython
   }
 </style>
 
-<h1>mptest jobs</h1>
-
-<p><a href="/jobs/start">Reload this page ...takes a few seconds...</a></p>
+<h1>Start Job</h1>
 
 <div style="border: 1px solid lightblue; background-color: #f0f8ff; padding: 10px; margin-bottom: 20px;">
-  <strong>Syntax for 'Tests' and 'Firmware':</strong><br/>
-  https://github.com/micropython/micropython.git@1.25.0 <strong>Checkout 'v1.25.0' (might be branch/hash/tag).</strong><br/>
-  https://github.com/micropython/micropython.git~17232 <strong>Checkout PR '17232'. Valid PR numbers may be found <a href="https://github.com/micropython/micropython/pulls" target="_blank">here</a>.</strong><br/>
-  https://github.com/micropython/micropython.git~17232@v1.25.0 <strong>Checkout PR '17232' and try to rebase on 'v1.25.0'.</strong><br/>
+  <strong>Syntax for 'Tests' and 'Firmware':</strong><br />
+  https://github.com/micropython/micropython.git@1.25.0 <strong>Checkout 'v1.25.0' (might be
+    branch/hash/tag).</strong><br />
+  https://github.com/micropython/micropython.git~17232 <strong>Checkout PR '17232'. Valid PR numbers may be found <a
+      href="https://github.com/micropython/micropython/pulls" target="_blank">here</a>.</strong><br />
+  https://github.com/micropython/micropython.git~17232@v1.25.0 <strong>Checkout PR '17232' and try to rebase on
+    'v1.25.0'.</strong><br />
+
+  <br /><br />
+  Github url's might be used too:
+  <br />
+  https://github.com/micropython/micropython/pull/17232/commits
+  <br />
+  https://github.com/micropython/micropython/commits/v1.25.0
+  <br />
+  https://github.com/micropython/micropython/commit/f498a16c7db6d4b2de200b3e0856528dfe0613c3#diff-69528cf7a1b680885089529ad7dd75caa165373a79f9d44cf32663215baebabf
+  <br />
+  https://github.com/micropython/micropython/tree/docs/library/bluetooth
 </div>
 
 <form method="post" action="/jobs/start">
@@ -29,7 +41,7 @@ Octoprobe - testbed_micropython
     <tbody>
       <tr>
         <td><label for="username">User name</label></td>
-        <td><input type="text" id="username" name="username" value="{{ Default.USER }}" required></td>
+        <td><input type="text" id="username" name="username" value="{{ form_startjob.username }}" required></td>
       </tr>
       <tr>
         <td></td>
@@ -37,7 +49,7 @@ Octoprobe - testbed_micropython
       </tr>
       <tr>
         <td><label for="arguments">Arguments</label></td>
-        <td><input type="text" id="arguments" name="arguments" , value="{{ Default.ARGUMENTS }}">
+        <td><input type="text" id="arguments" name="arguments" , value="{{ form_startjob.arguments }}">
         </td>
       </tr>
       <tr>
@@ -46,7 +58,7 @@ Octoprobe - testbed_micropython
       </tr>
       <tr>
         <td><label for="repo_tests">Tests</label></td>
-        <td><input type="text" id="repo_tests" name="repo_tests" required, value="{{ Default.REPO_TESTS }}"></td>
+        <td><input type="text" id="repo_tests" name="repo_tests" required, value="{{ form_startjob.repo_tests }}"></td>
       </tr>
       <tr>
         <td></td>
@@ -55,58 +67,37 @@ Octoprobe - testbed_micropython
       </tr>
       <tr>
         <td><label for="repo_firmware">Firmware</label></td>
-        <td><input type="text" id="repo_firmware" name="repo_firmware" value="{{ Default.REPO_FIRMWARE }}"></td>
+        <td><input type="text" id="repo_firmware" name="repo_firmware" value="{{ form_startjob.repo_firmware }}"></td>
       </tr>
       <tr>
         <td></td>
-        <td>The repo/branch to build the firmware. For example <i>https://github.com/micropython/micropython.git@master</i>.
-        </td>
-      </tr>
-      <tr>
-        <td></td>
-        <td>
-            <button type="submit" name="action" value="start" 
-                onclick="this.innerHTML='START ⏳'; this.style.cursor='wait';">START</button>
-          {%- if form_rc.msg_ok %}
-          <span style="color: green;">{{ form_rc.msg_ok }}</span>
-          {%- endif %}
-          {%- if form_rc.msg_error %}
-          <span style="color: red;">{{ form_rc.msg_error }}</span>
-          {%- endif %}
+        <td>The repo/branch to build the firmware. For example
+          <i>https://github.com/micropython/micropython.git@master</i>.
         </td>
       </tr>
     </tbody>
   </table>
+
+  <p>
+    <button type="submit" name="action" value="validate"
+      onclick="this.innerHTML='VALIDATE ⏳'; this.style.cursor='wait';">VALIDATE</button>
+    <button type="submit" name="action" value="start"
+      onclick="this.innerHTML='START ⏳'; this.style.cursor='wait';">START</button>
+  </p>
+
+  <p>
+    {%- if form_rc.msg_ok %}
+    <span style="color: green;">{{ form_rc.msg_ok }}</span>
+    {%- endif %}
+    {%- if form_rc.msg_error %}
+    <span style="color: red;">{{ form_rc.msg_error }}</span>
+    {%- endif %}
+  </p>
+
 </form>
 
-<hr/>
-<table>
-  <thead>
-    <tr>
-      <th>Number</th>
-      <th>Status</th>
-      <th>Conclusion</th>
-      <th>URL</th>
-      <th>Results</th>
-      <th>Started At</th>
-    </tr>
-  </thead>
-  <tbody>
-    {%- for job in gh_jobs %}
-    <tr>
-      <td>{{ job.number }}</td>
-      <td>{{ job.status }}</td>
-      <td>{{ job.conclusion }}</td>
-      <td>
-        <a href="{{ job.url }}" target="_blank">job</a>
-        {%- if job.conclusion %}
-        <a href="/github_selfhosted_testrun_{{ job.number }}" target="_blank">results</a>
-        {%- endif %}
-      </td>
-      <td>{{ job.createdAt }}</td>
-      <td>{{ job.startedAt }}</td>
-    </tr>
-    {%- endfor %}
-  </tbody>
-</table>
+{%- if form_rc.stdout %}
+    {{ form_rc.stdout | safe }}
+{%- endif %}
+
 {%- endblock %}

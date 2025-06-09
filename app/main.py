@@ -3,7 +3,6 @@ import logging
 import pathlib
 import shutil
 import tarfile
-import time
 import typing
 
 from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
@@ -12,13 +11,12 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
 from app.util_github import (
-    Default,
     FormStartJob,
     ReturncodeStartJob,
-    gh_jobs,
     gh_start_job,
 )
 from app.util_github2 import gh_list, render_reports, save_as_workflow_input
+from app.util_validate import validate_repos
 
 from .constants import DIRECTORY_REPORTS
 from .render_directory import render_directory_or_file
@@ -34,25 +32,21 @@ assert DIRECTORY_TEMPLATES.is_dir()
 JINJA2_TEMPLATES = Jinja2Templates(directory=DIRECTORY_TEMPLATES)
 
 
-@app.get("/mock/gh_list")
-def mock_gh_list(request: Request):
-    gh_list()
-    return "done"
-
-
 @app.get("/index")
 def read_root(request: Request):
     return JINJA2_TEMPLATES.TemplateResponse("index.html", {"request": request})
 
 
-def _jobs_response(request: Request, form_rc: ReturncodeStartJob) -> HTMLResponse:
-    jobs = gh_jobs()
+def _jobs_response(
+    request: Request,
+    form_startjob: FormStartJob,
+    form_rc: ReturncodeStartJob,
+) -> HTMLResponse:
     return JINJA2_TEMPLATES.TemplateResponse(
         "jobs.html",
         {
             "request": request,
-            "Default": Default,
-            "gh_jobs": jobs,
+            "form_startjob": form_startjob,
             "form_rc": form_rc,
         },
     )
@@ -60,14 +54,28 @@ def _jobs_response(request: Request, form_rc: ReturncodeStartJob) -> HTMLRespons
 
 @app.get("/jobs/start")
 def jobs_index_get(request: Request):
-    return _jobs_response(request=request, form_rc=ReturncodeStartJob())
+    return _jobs_response(
+        request=request,
+        form_startjob=FormStartJob(),
+        form_rc=ReturncodeStartJob(),
+    )
 
 
 @app.post("/jobs/start")
 def jobs_index_post(
     request: Request, form_startjob: typing.Annotated[FormStartJob, Form()]
 ):
+    # form_data = await request.form()
+    # action = form_data.get("action", "start")
     # Need to examine which will be the next job number
+    if form_startjob.action == "validate":
+        form_rc = validate_repos(form_startjob=form_startjob)
+        return _jobs_response(
+            request=request,
+            form_startjob=form_startjob,
+            form_rc=form_rc,
+        )
+
     next_directory_metadata = gh_list()
     if next_directory_metadata is not None:
         save_as_workflow_input(
@@ -79,7 +87,11 @@ def jobs_index_post(
         # It typically takes some time till the new job appears in the list
         # time.sleep(2.0)
         pass
-    return _jobs_response(request=request, form_rc=form_rc)
+    return _jobs_response(
+        request=request,
+        form_startjob=form_startjob,
+        form_rc=form_rc,
+    )
 
 
 @app.post("/upload")

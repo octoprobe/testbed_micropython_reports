@@ -1,4 +1,3 @@
-import enum
 import json
 import os
 import subprocess
@@ -9,17 +8,11 @@ from app.constants import GITHUB_EVENT, GITHUB_REPO, GITHUB_WORKFLOW
 
 from . import util_github_mockdata
 
+USER_NOBODY = "nobody"
 MOCKED_GITHUB_RESULTS = False
 
 # Provoke errors if the environment variable is NOT defined
 EMAIL_USERS: list[str] = os.environ["EMAIL_USERS"].split(",")
-
-
-class Default(enum.StrEnum):
-    USER = "nobody"
-    ARGUMENTS = "--flash-skip --only-test=RUN-TESTS_EXTMOD_HARDWARE_NATIVE"
-    REPO_TESTS = "https://github.com/micropython/micropython.git@master"
-    REPO_FIRMWARE = "https://github.com/micropython/micropython.git@master"
 
 
 def subprocess_json(args: list[str]) -> dict | list:
@@ -35,7 +28,8 @@ def subprocess_json(args: list[str]) -> dict | list:
         raise
 
 
-def gh_jobs() -> list[dict[str, str | int]]:
+# TODO: This method may probably be removed!
+def gh_jobs_obsolete() -> list[dict[str, str | int]]:
     if MOCKED_GITHUB_RESULTS:
         return [
             *util_github_mockdata.gh_queued,  # type: ignore[list-item]
@@ -118,21 +112,23 @@ def gh_resolve_email(username: str) -> str | None:
 
 
 class FormStartJob(BaseModel):
-    username: str
-    arguments: str | None
-    repo_tests: str | None
-    repo_firmware: str | None
+    action: str = ""
+    username: str = USER_NOBODY
+    arguments: str | None = "--flash-skip --only-test=RUN-TESTS_EXTMOD_HARDWARE_NATIVE"
+    repo_tests: str | None = "https://github.com/micropython/micropython.git@master"
+    repo_firmware: str | None = "https://github.com/micropython/micropython.git@master"
 
 
 class ReturncodeStartJob(BaseModel):
     msg_ok: str | None = None
     msg_error: str | None = None
+    stdout: str | None = None
 
 
 def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
     form_rc = ReturncodeStartJob()
 
-    if form_startjob.username == Default.USER:
+    if form_startjob.username == USER_NOBODY:
         form_rc.msg_error = "Skipped: User unknown..."
         return form_rc
 
@@ -175,5 +171,7 @@ def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
         form_rc.msg_error = f"Error decoding JSON: {e}"
         return form_rc
 
-    form_rc.msg_ok = "Job successfully added. The new job will be the topmost in below list. You might need to reload the page after a few seconds..."
+    form_rc.msg_ok = (
+        "Job successfully added. The new job will appear on the 'Reports' page."
+    )
     return form_rc
