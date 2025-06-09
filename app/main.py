@@ -40,21 +40,6 @@ def mock_gh_list(request: Request):
     return "done"
 
 
-@app.get("/reports")
-def reports(request: Request, read_github: bool = False):
-    if read_github:
-        gh_list()
-
-    workflow_reports = render_reports()
-    return JINJA2_TEMPLATES.TemplateResponse(
-        "reports.html",
-        {
-            "request": request,
-            "workflow_reports": workflow_reports,
-        },
-    )
-
-
 @app.get("/index")
 def read_root(request: Request):
     return JINJA2_TEMPLATES.TemplateResponse("index.html", {"request": request})
@@ -73,12 +58,12 @@ def _jobs_response(request: Request, form_rc: ReturncodeStartJob) -> HTMLRespons
     )
 
 
-@app.get("/jobs/index")
+@app.get("/jobs/start")
 def jobs_index_get(request: Request):
     return _jobs_response(request=request, form_rc=ReturncodeStartJob())
 
 
-@app.post("/jobs/index")
+@app.post("/jobs/start")
 def jobs_index_post(
     request: Request, form_startjob: typing.Annotated[FormStartJob, Form()]
 ):
@@ -153,6 +138,24 @@ async def upload_tar_file(
 
 # Mount the 'uploads' directory for browsing
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
+
+
+@app.get("/")
+def reports(request: Request, read_github: bool = False):
+    """
+    This top route '/' overrides the following '/{path:path}'!
+    """
+    if read_github:
+        gh_list()
+
+    workflow_reports = render_reports()
+    return JINJA2_TEMPLATES.TemplateResponse(
+        "reports.html",
+        {
+            "request": request,
+            "workflow_reports": workflow_reports,
+        },
+    )
 
 
 @app.get("/{path:path}", response_class=HTMLResponse)
