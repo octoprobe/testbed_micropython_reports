@@ -123,6 +123,7 @@ class ReturncodeStartJob(BaseModel):
     msg_ok: str | None = None
     msg_error: str | None = None
     stdout: str | None = None
+    stderr: str | None = None
 
 
 def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:

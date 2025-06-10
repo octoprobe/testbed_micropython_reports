@@ -19,15 +19,15 @@ Octoprobe - testbed_micropython
   <strong>Syntax for 'Tests' and 'Firmware':</strong><br />
   https://github.com/micropython/micropython.git@1.25.0 <strong>Checkout 'v1.25.0' (might be
     branch/hash/tag).</strong><br />
-  https://github.com/micropython/micropython.git~17232 <strong>Checkout PR '17232'. Valid PR numbers may be found <a
+  https://github.com/micropython/micropython.git~17468 <strong>Checkout PR '17468'. Valid PR numbers may be found <a
       href="https://github.com/micropython/micropython/pulls" target="_blank">here</a>.</strong><br />
-  https://github.com/micropython/micropython.git~17232@v1.25.0 <strong>Checkout PR '17232' and try to rebase on
+  https://github.com/micropython/micropython.git~17468@v1.25.0 <strong>Checkout PR '17468' and try to rebase on
     'v1.25.0'.</strong><br />
 
   <br /><br />
   Github url's might be used too:
   <br />
-  https://github.com/micropython/micropython/pull/17232/commits
+  https://github.com/micropython/micropython/pull/17468/commits
   <br />
   https://github.com/micropython/micropython/commits/v1.25.0
   <br />
@@ -85,19 +85,27 @@ Octoprobe - testbed_micropython
       onclick="this.innerHTML='START ⏳'; this.style.cursor='wait';">START</button>
   </p>
 
-  <p>
-    {%- if form_rc.msg_ok %}
-    <span style="color: green;">{{ form_rc.msg_ok }}</span>
-    {%- endif %}
-    {%- if form_rc.msg_error %}
-    <span style="color: red;">{{ form_rc.msg_error }}</span>
-    {%- endif %}
-  </p>
+  {%- if form_rc.msg_ok %}
+  <h2 style="color: green;">{{ form_rc.msg_ok }}</h2>
+  {%- endif %}
+  {%- if form_rc.msg_error %}
+  <h2 style="color: red;">{{ form_rc.msg_error }}</h2>
+  {%- endif %}
 
 </form>
 
 {%- if form_rc.stdout %}
-    {{ form_rc.stdout | safe }}
+<div style="border: 1px solid green; background-color: rgb(228, 255, 228); padding: 10px; margin-bottom: 20px;">
+  {{ form_rc.stdout | safe }}
+</div>
+{%- endif %}
+
+{%- if form_rc.stderr %}
+<div style="border: 1px solid red; background-color: rgb(248, 188, 165); padding: 10px; margin-bottom: 20px;">
+  <pre style="font-size: small;">{{ form_rc.stdout | safe }}</pre>
+</div>
+
+<pre style="font-size: small; color: red;">{{ form_rc.stdout | safe }}</pre>
 {%- endif %}
 
 {%- endblock %}

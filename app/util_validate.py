@@ -52,15 +52,15 @@ def validate_repos(form_startjob: FormStartJob) -> ReturncodeStartJob:
         try:
             metadata = cache.clone(git_clean=False)
         except SubprocessExitCodeException as e:
-            return ReturncodeStartJob(msg_error=f"Failed: {repo}", stdout=f"{e!r}")
+            return ReturncodeStartJob(
+                msg_error=f"Failed: {repo}", stderr=f"{e.__class__.__name__}: {e}"
+            )
 
-        stdout.write(
-            '<div style="border: 1px solid gray; background-color: #F0F0F0; padding: 10px; margin-bottom: 20px;">\n'
+        a_git_spec = (
+            f'<a href="{metadata.url_link}" target="_blank">{metadata.git_spec}</a>'
         )
-        # stdout.write("<p>\n")
-        stdout.write(
-            f"""<h2><a href="{metadata.url_link}" target="_blank">{metadata.git_spec}</a></h2>\n"""
-        )
+        a_commit_hash = f'<a href="{metadata.url_commit_hash}" target="_blank">{metadata.commit_comment}</a>'
+        stdout.write(f"<h3>{a_git_spec} {a_commit_hash}</h3>\n")
         for command in (metadata.command_describe, metadata.command_log):
             stdout.write("<br/>\n")
             stdout.write(f"{html.escape(command.command)}\n")
@@ -69,7 +69,5 @@ def validate_repos(form_startjob: FormStartJob) -> ReturncodeStartJob:
             stdout.write(
                 f'<div style="padding-left: 20px;"><code>{_stdout}</code></div>\n'
             )
-        # stdout.write("</p>\n")
-        stdout.write("</div>\n")
     form_rc = ReturncodeStartJob(msg_ok="Ok", stdout=stdout.getvalue())
     return form_rc
