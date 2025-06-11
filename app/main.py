@@ -16,13 +16,16 @@ from app.util_github import (
     gh_start_job,
 )
 from app.util_github2 import gh_list, render_reports, save_as_workflow_input
+from app.util_logging import init_logging
 from app.util_validate import validate_repos
 
 from .constants import DIRECTORY_REPORTS
 from .render_directory import render_directory_or_file
 from .render_log import SEVERITY_DEFAULT
 
-logger = logging.Logger(__file__)
+logger = logging.getLogger(__file__)
+
+init_logging(level=logging.INFO)
 
 app = FastAPI()
 

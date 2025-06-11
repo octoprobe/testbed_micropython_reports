@@ -11,7 +11,7 @@ from markupsafe import Markup
 
 from .util_html import Segments
 
-logger = logging.Logger(__file__)
+logger = logging.getLogger(__file__)
 
 RE_ENDOF_PATH = re.compile(r"( |\n|\\n|\'|\"|$)")
 

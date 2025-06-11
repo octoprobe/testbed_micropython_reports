@@ -13,7 +13,7 @@ from .render_ansii_color import render_ansi_color
 from .render_log import DEFAULT_LOGFILE, is_logfile, render_log
 from .render_markdown import render_markdown
 
-logger = logging.Logger(__file__)
+logger = logging.getLogger(__file__)
 
 # TODO: Obsolete
 RE_NUMBER = re.compile(r"((?P<number>\d+)|(?P<text>^\d+))")

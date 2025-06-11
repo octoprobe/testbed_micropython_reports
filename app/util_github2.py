@@ -3,6 +3,7 @@ from __future__ import annotations
 import dataclasses
 import datetime
 import json
+import logging
 import pathlib
 import re
 
@@ -22,6 +23,8 @@ from app.constants import (
     GITHUB_WORKFLOW,
 )
 from app.util_github import FormStartJob, gh_list2
+
+logger = logging.getLogger(__file__)
 
 
 @dataclasses.dataclass(slots=True)
@@ -213,10 +216,8 @@ class WorkflowReport:
                 json_text = gh_list_json.read_text()
                 json_dict = json.loads(json_text)
                 workflow_job = WorkflowJob(**json_dict)
-            except FileNotFoundError as e:
-                raise FileNotFoundError(f"{gh_list_json}: {e}") from e
             except Exception as e:
-                raise Exception(f"{gh_list_json}: {e}") from e
+                logger.debug(f"{gh_list_json}: {e!r}")
 
         inputs_json = DIRECTORY_REPORTS / base_directory / FILENAME_INPUTS_JSON
         if not inputs_json.is_file():
@@ -229,22 +230,24 @@ class WorkflowReport:
                 json_text = inputs_json.read_text()
                 json_dict = json.loads(json_text)
                 workflow_input = WorkflowInput(**json_dict)
-            except FileNotFoundError as e:
-                raise FileNotFoundError(f"{inputs_json}: {e}") from e
             except Exception as e:
-                raise Exception(f"{inputs_json}: {e}") from e
+                logger.debug(f"{gh_list_json}: {e!r}")
 
         context_json = DIRECTORY_REPORTS / base_directory / FILENAME_CONTEXT_JSON
         if context_json.is_file():
             try:
                 json_text = context_json.read_text()
                 json_dict = json.loads(json_text)
-                result_tests = ResultTests(**json_dict)
-
-            except FileNotFoundError as e:
-                raise FileNotFoundError(f"{inputs_json}: {e}") from e
+                result_tests_ = ResultTests(**json_dict)
+                result_tests_.ref_firmware_metadata = GitMetadata(
+                    **result_tests_.ref_firmware_metadata  # type: arg-type
+                )
+                result_tests_.ref_tests_metadata = GitMetadata(
+                    **result_tests_.ref_tests_metadata  # type: arg-type
+                )
+                result_tests = result_tests_
             except Exception as e:
-                raise Exception(f"{inputs_json}: {e}") from e
+                logger.debug(f"{gh_list_json}: {e!r}")
 
         return WorkflowReport(
             base_directory=BaseDirectory(base_directory=base_directory),
@@ -288,9 +291,12 @@ class WorkflowReport:
             return Markup()
         return self._commit_markup(self.result_tests.ref_firmware_metadata)
 
-    def _commit_markup(self, json_metadata: dict) -> Markup:
+    def _commit_markup(self, metadata: GitMetadata | None) -> Markup:
+        if metadata is None:
+            return Markup()
+        assert isinstance(metadata, GitMetadata), metadata
         try:
-            metadata = GitMetadata(**json_metadata)
+            # metadata = GitMetadata(**json_metadata)
             href_commit = f'<a href={metadata.url_commit_hash} target="_blank" title="{metadata.commit_comment}">{metadata.commit_comment}</a>'
             return Markup(href_commit)
         except:  # noqa: E722
