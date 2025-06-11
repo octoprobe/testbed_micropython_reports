@@ -7,7 +7,11 @@ import pathlib
 import re
 
 from markupsafe import Markup
-from octoprobe.util_cached_git_repo import GitSpec
+from octoprobe.util_cached_git_repo import GitMetadata, GitSpec
+from testbed_micropython.testreport.util_testreport import (
+    FILENAME_CONTEXT_JSON,
+    ResultTests,
+)
 
 from app.constants import (
     DIRECTORY_REPORTS,
@@ -187,16 +191,19 @@ class WorkflowReport:
     base_directory: BaseDirectory
     job: WorkflowJob | None
     input: WorkflowInput | None
+    result_tests: ResultTests | None
 
     def __post_init__(self) -> None:
         assert isinstance(self.base_directory, BaseDirectory)
         assert isinstance(self.job, WorkflowJob | None)
         assert isinstance(self.input, WorkflowInput | None)
+        assert isinstance(self.result_tests, ResultTests | None)
 
     @classmethod
     def factory(cls, base_directory: str) -> WorkflowReport:
         workflow_job = None
-        workflow_input = None
+        workflow_input: WorkflowInput | None = None
+        result_tests: ResultTests | None = None
 
         gh_list_json = (
             DIRECTORY_REPORTS_METADATA / base_directory / FILENAME_GH_LIST_JSON
@@ -226,10 +233,24 @@ class WorkflowReport:
                 raise FileNotFoundError(f"{inputs_json}: {e}") from e
             except Exception as e:
                 raise Exception(f"{inputs_json}: {e}") from e
+
+        context_json = DIRECTORY_REPORTS / base_directory / FILENAME_CONTEXT_JSON
+        if context_json.is_file():
+            try:
+                json_text = context_json.read_text()
+                json_dict = json.loads(json_text)
+                result_tests = ResultTests(**json_dict)
+
+            except FileNotFoundError as e:
+                raise FileNotFoundError(f"{inputs_json}: {e}") from e
+            except Exception as e:
+                raise Exception(f"{inputs_json}: {e}") from e
+
         return WorkflowReport(
             base_directory=BaseDirectory(base_directory=base_directory),
             job=workflow_job,
             input=workflow_input,
+            result_tests=result_tests,
         )
 
     @property
@@ -254,6 +275,26 @@ class WorkflowReport:
         return Markup(
             f'<a href="{link}" target="_blank" title="Summary Report">{self.job.conclusion}</a>'
         )
+
+    @property
+    def repo_tests_commit_markup(self) -> Markup:
+        if self.result_tests is None:
+            return Markup()
+        return self._commit_markup(self.result_tests.ref_tests_metadata)
+
+    @property
+    def repo_firmware_commit_markup(self) -> Markup:
+        if self.result_tests is None:
+            return Markup()
+        return self._commit_markup(self.result_tests.ref_firmware_metadata)
+
+    def _commit_markup(self, json_metadata: dict) -> Markup:
+        try:
+            metadata = GitMetadata(**json_metadata)
+            href_commit = f'<a href={metadata.url_commit_hash} target="_blank" title="{metadata.commit_comment}">{metadata.commit_comment}</a>'
+            return Markup(href_commit)
+        except:  # noqa: E722
+            return Markup()
 
 
 def gh_list() -> pathlib.Path | None:

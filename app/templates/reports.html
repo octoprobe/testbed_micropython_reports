@@ -6,7 +6,7 @@ Octoprobe - testbed_micropython
 
 {% block content %}
 <h1>Reports
-<a href="/?read_github=1"><img src="/static/bootstrap_arrow-clockwise.svg" title="update github actions"/></a>
+    <a href="/?read_github=1"><img src="/static/bootstrap_arrow-clockwise.svg" title="update github actions" /></a>
 </h1>
 <table>
     <thead>
@@ -29,8 +29,8 @@ Octoprobe - testbed_micropython
                 {{ workflow_report.job.duration_markup }}
             </td>
             <td>
-                {{ workflow_report.input.repo_tests_markup }}<br />
-                {{ workflow_report.input.repo_firmware_markup }}
+                {{ workflow_report.input.repo_tests_markup }} {{ workflow_report.repo_tests_commit_markup }}<br />
+                {{ workflow_report.input.repo_firmware_markup }} {{ workflow_report.repo_firmware_commit_markup }}
             </td>
             <td>
                 {{ workflow_report.input.email_testreport }}<br />
