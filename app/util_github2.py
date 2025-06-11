@@ -238,14 +238,7 @@ class WorkflowReport:
             try:
                 json_text = context_json.read_text()
                 json_dict = json.loads(json_text)
-                result_tests_ = ResultTests(**json_dict)
-                result_tests_.ref_firmware_metadata = GitMetadata(
-                    **result_tests_.ref_firmware_metadata  # type: arg-type
-                )
-                result_tests_.ref_tests_metadata = GitMetadata(
-                    **result_tests_.ref_tests_metadata  # type: arg-type
-                )
-                result_tests = result_tests_
+                result_tests = ResultTests.from_dict(json_dict=json_dict)
             except Exception as e:
                 logger.debug(f"{gh_list_json}: {e!r}")
 
@@ -296,7 +289,6 @@ class WorkflowReport:
             return Markup()
         assert isinstance(metadata, GitMetadata), metadata
         try:
-            # metadata = GitMetadata(**json_metadata)
             href_commit = f'<a href={metadata.url_commit_hash} target="_blank" title="{metadata.commit_comment}">{metadata.commit_comment}</a>'
             return Markup(href_commit)
         except:  # noqa: E722
@@ -311,7 +303,7 @@ def gh_list() -> pathlib.Path | None:
     next_directory_metadata: pathlib.Path | None = None
     jobs = gh_list2()
     for json_job in jobs:
-        workflow_job = WorkflowJob(**json_job)
+        workflow_job = WorkflowJob(**json_job)  # type: ignore[arg-type]
         if next_directory_metadata is None:
             next_directory_metadata = WorkflowJob.static_directory_metadata(
                 name=workflow_job.name, number=workflow_job.number + 1
