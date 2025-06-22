@@ -11,7 +11,7 @@ from markupsafe import Markup
 from octoprobe.util_cached_git_repo import GitMetadata, GitSpec
 from testbed_micropython.testreport.util_testreport import (
     FILENAME_CONTEXT_JSON,
-    ResultTests,
+    ResultContext,
 )
 
 from app.constants import (
@@ -194,19 +194,19 @@ class WorkflowReport:
     base_directory: BaseDirectory
     job: WorkflowJob | None
     input: WorkflowInput | None
-    result_tests: ResultTests | None
+    result_context: ResultContext | None
 
     def __post_init__(self) -> None:
         assert isinstance(self.base_directory, BaseDirectory)
         assert isinstance(self.job, WorkflowJob | None)
         assert isinstance(self.input, WorkflowInput | None)
-        assert isinstance(self.result_tests, ResultTests | None)
+        assert isinstance(self.result_context, ResultContext | None)
 
     @classmethod
     def factory(cls, base_directory: str) -> WorkflowReport:
         workflow_job = None
         workflow_input: WorkflowInput | None = None
-        result_tests: ResultTests | None = None
+        result_context: ResultContext | None = None
 
         gh_list_json = (
             DIRECTORY_REPORTS_METADATA / base_directory / FILENAME_GH_LIST_JSON
@@ -238,7 +238,7 @@ class WorkflowReport:
             try:
                 json_text = context_json.read_text()
                 json_dict = json.loads(json_text)
-                result_tests = ResultTests.from_dict(json_dict=json_dict)
+                result_context = ResultContext.from_dict(json_dict=json_dict)
             except Exception as e:
                 logger.debug(f"{gh_list_json}: {e!r}")
 
@@ -246,7 +246,7 @@ class WorkflowReport:
             base_directory=BaseDirectory(base_directory=base_directory),
             job=workflow_job,
             input=workflow_input,
-            result_tests=result_tests,
+            result_context=result_context,
         )
 
     @property
@@ -274,15 +274,15 @@ class WorkflowReport:
 
     @property
     def repo_tests_commit_markup(self) -> Markup:
-        if self.result_tests is None:
+        if self.result_context is None:
             return Markup()
-        return self._commit_markup(self.result_tests.ref_tests_metadata)
+        return self._commit_markup(self.result_context.ref_tests_metadata)
 
     @property
     def repo_firmware_commit_markup(self) -> Markup:
-        if self.result_tests is None:
+        if self.result_context is None:
             return Markup()
-        return self._commit_markup(self.result_tests.ref_firmware_metadata)
+        return self._commit_markup(self.result_context.ref_firmware_metadata)
 
     def _commit_markup(self, metadata: GitMetadata | None) -> Markup:
         if metadata is None:
@@ -291,7 +291,7 @@ class WorkflowReport:
         try:
             href_commit = f'<a href={metadata.url_commit_hash} target="_blank" title="{metadata.commit_comment}">{metadata.commit_comment}</a>'
             return Markup(href_commit)
-        except:  # noqa: E722
+        except:  # noqa: E722  # pylint: disable=bare-except
             return Markup()
 
 
