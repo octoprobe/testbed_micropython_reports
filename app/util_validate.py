@@ -29,7 +29,7 @@ def fix_repos(form_startjob: FormStartJob) -> None:
 def validate_repos(form_startjob: FormStartJob) -> ReturncodeStartJob:
     if form_startjob.username == USER_NOBODY:
         form_rc = ReturncodeStartJob(
-            msg_ok="Failed: Please add valid user",
+            msg_error="Failed: Please add valid user",
         )
         return form_rc
 

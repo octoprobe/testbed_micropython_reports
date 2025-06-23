@@ -114,11 +114,18 @@ def gh_resolve_email(username: str) -> str | None:
 class FormStartJob(BaseModel):
     action: str = ""
     username: str = USER_NOBODY
-    arguments: str | None = (
-        "--only-test=RUN-TESTS_EXTMOD_HARDWARE_NATIVE --only-board=RPI_PICO_W"
-    )
+    arguments: str | None = ""
     repo_tests: str | None = "https://github.com/micropython/micropython.git@master"
     repo_firmware: str | None = "https://github.com/micropython/micropython.git@master"
+
+    @staticmethod
+    def arguments_prefilled() -> list[str]:
+        return [
+            "",
+            "--only-test=RUN-NATMODTESTS",
+            "--only-test=RUN-TESTS_EXTMOD_HARDWARE_NATIVE --only-board=RPI_PICO_W",
+            "--only-test='RUN-TESTS_STANDARD:run-tests.py --test-dirs=micropython' --only-board=RPI_PICO2-RISCV",
+        ]
 
 
 class ReturncodeStartJob(BaseModel):

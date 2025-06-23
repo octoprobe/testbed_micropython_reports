@@ -160,8 +160,11 @@ def reports(request: Request, read_github: bool = False):
     """
     This top route '/' overrides the following '/{path:path}'!
     """
-    if read_github:
+    # if read_github:
+    try:
         gh_list()
+    except Exception as e:
+        print(f"ERROR: {e}")
 
     workflow_reports = render_reports()
     return JINJA2_TEMPLATES.TemplateResponse(

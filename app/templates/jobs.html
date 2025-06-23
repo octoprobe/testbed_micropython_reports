@@ -11,6 +11,11 @@ Octoprobe - testbed_micropython
     border-color: lightgray;
     border-width: 1px;
   }
+
+  td {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
 </style>
 
 <h1>Start Job</h1>
@@ -37,41 +42,42 @@ Octoprobe - testbed_micropython
 </div>
 
 <form method="post" action="/jobs/start">
-  <table>
+  <table style="width: auto;">
     <tbody>
       <tr>
         <td><label for="username">User name</label></td>
-        <td><input type="text" id="username" name="username" value="{{ form_startjob.username }}" required></td>
-      </tr>
-      <tr>
-        <td></td>
-        <td>Valid github user which will receive the testresults by email.</td>
-      </tr>
-      <tr>
-        <td><label for="arguments">Arguments</label></td>
-        <td><input type="text" id="arguments" name="arguments" , value="{{ form_startjob.arguments }}">
+        <td><input type="text" id="username" name="username" value="{{ form_startjob.username }}" required>
+          <br />
+          Github user which will receive the testresults by email.
         </td>
       </tr>
       <tr>
-        <td></td>
-        <td>Optional commandline arguments for <i>mptest</i>.</td>
+        <td><label for="arguments">Arguments</label></td>
+        <td>
+          <input type="text" id="arguments" name="arguments" value="{{ form_startjob.arguments }}">
+          <br />
+
+          <select id="combo_arguments" name="combo_arguments" style="font-size: x-small; width: 100%;"
+            onchange="document.getElementById('arguments').value = this.value;">
+            {%- for argument in form_startjob.arguments_prefilled() %}
+            <option value="{{ argument }}">{{ argument }}</option>
+            {% endfor %}
+          </select>
+          <br />
+          Optional commandline arguments for <i>mptest</i>.
+        </td>
       </tr>
       <tr>
         <td><label for="repo_tests">Tests</label></td>
-        <td><input type="text" id="repo_tests" name="repo_tests" required, value="{{ form_startjob.repo_tests }}"></td>
-      </tr>
-      <tr>
-        <td></td>
-        <td>The repo/branch for the testcode. For example <i>https://github.com/micropython/micropython.git@master</i>.
+        <td><input type="text" id="repo_tests" name="repo_tests" required, value="{{ form_startjob.repo_tests }}"><br />
+          The repo/branch for the testcode. For example <i>https://github.com/micropython/micropython.git@master
         </td>
       </tr>
       <tr>
         <td><label for="repo_firmware">Firmware</label></td>
-        <td><input type="text" id="repo_firmware" name="repo_firmware" value="{{ form_startjob.repo_firmware }}"></td>
-      </tr>
-      <tr>
-        <td></td>
-        <td>The repo/branch to build the firmware. For example
+        <td><input type="text" id="repo_firmware" name="repo_firmware" value="{{ form_startjob.repo_firmware }}">
+          <br />
+          The repo/branch to build the firmware. For example
           <i>https://github.com/micropython/micropython.git@master</i>.
         </td>
       </tr>
@@ -83,8 +89,7 @@ Octoprobe - testbed_micropython
       onclick="this.innerHTML='VALIDATE ⏳'; this.style.cursor='wait';">
       VALIDATE
     </button>
-    <button type="submit" name="action" value="start"
-      {{ form_rc.button_start_disabled }}
+    <button type="submit" name="action" value="start" {{ form_rc.button_start_disabled }}
       onclick="this.innerHTML='START ⏳'; this.style.cursor='wait';">
       START
     </button>
