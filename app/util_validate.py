@@ -5,7 +5,7 @@ import pathlib
 from octoprobe.util_cached_git_repo import CachedGitRepo, GitSpec
 from octoprobe.util_subprocess import SubprocessExitCodeException
 
-from app.util_github import FormStartJob, ReturncodeStartJob
+from app.util_github import FormStartJob, ReturncodeStartJob, USER_NOBODY
 
 DIRECTORY_CACHE = pathlib.Path("/tmp/git_cache")
 
@@ -27,6 +27,12 @@ def fix_repos(form_startjob: FormStartJob) -> None:
 
 
 def validate_repos(form_startjob: FormStartJob) -> ReturncodeStartJob:
+    if form_startjob.username == USER_NOBODY:
+        form_rc = ReturncodeStartJob(
+            msg_ok="Failed: Please add valid user",
+        )
+        return form_rc
+
     fix_repos(form_startjob=form_startjob)
 
     stdout = io.StringIO()

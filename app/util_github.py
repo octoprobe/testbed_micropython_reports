@@ -114,7 +114,9 @@ def gh_resolve_email(username: str) -> str | None:
 class FormStartJob(BaseModel):
     action: str = ""
     username: str = USER_NOBODY
-    arguments: str | None = "--flash-skip --only-test=RUN-TESTS_EXTMOD_HARDWARE_NATIVE"
+    arguments: str | None = (
+        "--only-test=RUN-TESTS_EXTMOD_HARDWARE_NATIVE --only-board=RPI_PICO_W"
+    )
     repo_tests: str | None = "https://github.com/micropython/micropython.git@master"
     repo_firmware: str | None = "https://github.com/micropython/micropython.git@master"
 
@@ -124,6 +126,12 @@ class ReturncodeStartJob(BaseModel):
     msg_error: str | None = None
     stdout: str | None = None
     stderr: str | None = None
+
+    @property
+    def button_start_disabled(self) -> str:
+        if isinstance(self.msg_ok, str):
+            return ""
+        return "disabled"
 
 
 def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:

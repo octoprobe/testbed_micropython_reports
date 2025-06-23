@@ -80,9 +80,14 @@ Octoprobe - testbed_micropython
 
   <p>
     <button type="submit" name="action" value="validate"
-      onclick="this.innerHTML='VALIDATE ⏳'; this.style.cursor='wait';">VALIDATE</button>
+      onclick="this.innerHTML='VALIDATE ⏳'; this.style.cursor='wait';">
+      VALIDATE
+    </button>
     <button type="submit" name="action" value="start"
-      onclick="this.innerHTML='START ⏳'; this.style.cursor='wait';">START</button>
+      {{ form_rc.button_start_disabled }}
+      onclick="this.innerHTML='START ⏳'; this.style.cursor='wait';">
+      START
+    </button>
   </p>
 
   {%- if form_rc.msg_ok %}
