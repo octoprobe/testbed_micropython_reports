@@ -2,7 +2,7 @@ import pathlib
 
 from fastapi import HTTPException
 from fastapi.responses import HTMLResponse
-from testbed_micropython.testreport.util_markdown2 import markdown2html
+from testbed_micropython.report_test.util_markdown2 import markdown2html
 
 
 def render_markdown(markdown_file: pathlib.Path) -> HTMLResponse:

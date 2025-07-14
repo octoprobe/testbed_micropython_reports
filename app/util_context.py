@@ -2,7 +2,7 @@ import json
 import pathlib
 
 from octoprobe.util_constants import DirectoryTag
-from testbed_micropython.testreport.util_testreport import FILENAME_CONTEXT_JSON
+from testbed_micropython.report_test.util_testreport import FILENAME_CONTEXT_JSON
 
 from . import constants, util_path_replace
 

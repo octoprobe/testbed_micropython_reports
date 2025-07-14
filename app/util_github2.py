@@ -9,7 +9,7 @@ import re
 
 from markupsafe import Markup
 from octoprobe.util_cached_git_repo import GitMetadata, GitSpec
-from testbed_micropython.testreport.util_testreport import (
+from testbed_micropython.report_test.util_testreport import (
     FILENAME_CONTEXT_JSON,
     ResultContext,
 )
