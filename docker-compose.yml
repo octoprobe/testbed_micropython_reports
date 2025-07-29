@@ -4,7 +4,7 @@ services:
   web:
     build: .
     image: octoprobe-testbed_micropython-fastapi:${IMAGE_VERSION}
-    command: uvicorn app.main:app --host 0.0.0.0 --port 443 --ssl-keyfile=${SSL_KEY} --ssl-certfile=${SSL_CERT}
+    entrypoint: ["/bin/sh", "-c", "app/start_uvicorn.sh"]
     volumes:
       - ./.:/server
       - /etc/letsencrypt:/etc/letsencrypt:ro
