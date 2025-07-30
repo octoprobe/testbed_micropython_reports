@@ -59,7 +59,8 @@ def validate_repos(form_startjob: FormStartJob) -> ReturncodeStartJob:
             metadata = cache.clone(git_clean=False)
         except SubprocessExitCodeException as e:
             return ReturncodeStartJob(
-                msg_error=f"Failed: {repo}", stderr=f"{e.__class__.__name__}: {e}"
+                msg_error=f"Failed: {repo}",
+                stderr=f"{e.__class__.__name__}: {e}",
             )
 
         a_git_spec = (

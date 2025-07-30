@@ -112,10 +112,8 @@ Octoprobe - testbed_micropython
 
 {%- if form_rc.stderr %}
 <div style="border: 1px solid red; background-color: rgb(248, 188, 165); padding: 10px; margin-bottom: 20px;">
-  <pre style="font-size: small;">{{ form_rc.stdout | safe }}</pre>
+  <pre style="font-size: small;">{{ form_rc.stderr | safe }}</pre>
 </div>
-
-<pre style="font-size: small; color: red;">{{ form_rc.stdout | safe }}</pre>
 {%- endif %}
 
 {%- endblock %}
