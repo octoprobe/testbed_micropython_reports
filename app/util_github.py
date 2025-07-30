@@ -124,6 +124,7 @@ class FormStartJob(BaseModel):
             "",
             "--only-test=RUN-NATMODTESTS",
             "--only-test=RUN-TESTS_EXTMOD_HARDWARE_NATIVE --only-board=RPI_PICO_W",
+            "--only-board=LOLIN_D1_MINI --skip-test=RUN-MULTITESTS_MULTINET",
             "--only-test='RUN-TESTS_STANDARD:run-tests.py --test-dirs=micropython' --only-board=RPI_PICO2-RISCV",
         ]
 
