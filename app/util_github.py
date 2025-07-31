@@ -171,7 +171,7 @@ def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
         "--field",
         f"repo_tests={form_startjob.repo_tests}",
         "--field",
-        f"email_testreport='{email_testreport}'",
+        f"email_testreport={email_testreport}",
     ]
 
     try:
