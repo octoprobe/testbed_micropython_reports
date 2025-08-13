@@ -32,4 +32,5 @@ else:
     GITHUB_REPO = "octoprobe/testbed_micropython_runner_obsolete"
 
 FILENAME_GH_LIST_JSON = "gh_list.json"
+FILENAME_EXPIRY = "expiry.json"
 FILENAME_INPUTS_JSON = "github_debug/inputs.json"

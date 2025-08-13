@@ -15,7 +15,12 @@ from app.util_github import (
     ReturncodeStartJob,
     gh_start_job,
 )
-from app.util_github2 import gh_list, render_reports, save_as_workflow_input
+from app.util_github2 import (
+    WorkflowExpiry,
+    gh_list,
+    list_reports,
+    save_as_workflow_input,
+)
 from app.util_logging import init_logging
 from app.util_validate import validate_repos
 
@@ -151,6 +156,17 @@ async def upload_tar_file(
         ) from e
 
 
+@app.get("/purge")
+def purge_expired_reports(request: Request):
+    return JINJA2_TEMPLATES.TemplateResponse(
+        "purge_expired_reports.html",
+        {
+            "request": request,
+            "list_reports": list_reports,
+        },
+    )
+
+
 # Mount the 'uploads' directory for browsing
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
@@ -160,18 +176,25 @@ def reports(request: Request, read_github: bool = False):
     """
     This top route '/' overrides the following '/{path:path}'!
     """
+    workflow_unique_id = request.query_params.get("workflow_unique_id", None)
+    if workflow_unique_id is not None:
+        # Expiry dialog. Write back values
+        tag = request.query_params["tag"]
+        expiry = request.query_params["expiry"]
+        workflow_expiry = WorkflowExpiry(tag=tag, expiry=expiry)
+        workflow_expiry.write(workflow_unique_id=workflow_unique_id)
+
     # if read_github:
     try:
         gh_list()
     except Exception as e:
         print(f"ERROR: {e}")
 
-    workflow_reports = render_reports()
     return JINJA2_TEMPLATES.TemplateResponse(
         "reports.html",
         {
             "request": request,
-            "workflow_reports": workflow_reports,
+            "list_reports": list_reports,
         },
     )
 

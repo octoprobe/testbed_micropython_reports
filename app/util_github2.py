@@ -6,6 +6,8 @@ import json
 import logging
 import pathlib
 import re
+import shutil
+import time
 
 from markupsafe import Markup
 from octoprobe.util_cached_git_repo import GitMetadata, GitSpec
@@ -17,6 +19,7 @@ from testbed_micropython.report_test.util_testreport import (
 from app.constants import (
     DIRECTORY_REPORTS,
     DIRECTORY_REPORTS_METADATA,
+    FILENAME_EXPIRY,
     FILENAME_GH_LIST_JSON,
     FILENAME_INPUTS_JSON,
     GITHUB_PREFIX,
@@ -159,6 +162,76 @@ class WorkflowJob:
         )
 
 
+EXPIRY_TRASH = "trash"
+EXPIRY_NEVER = "never"
+
+
+@dataclasses.dataclass(slots=True)
+class WorkflowExpiry:
+    tag: str
+    "hmaerki"
+    expiry: str
+    "Example: 2025-05-27"
+
+    @property
+    def expired(self) -> bool:
+        """
+        Compare the expiry date with the current time.
+        Return whether this report has expired.
+        """
+        if self.expiry == EXPIRY_NEVER:
+            return False
+
+        if self.expiry == EXPIRY_TRASH:
+            return True
+
+        now_date = WorkflowExpiry.format_expiry(0)
+        return now_date > self.expiry
+
+    @staticmethod
+    def format_expiry(days: int) -> str:
+        """
+        Return the expiry date in the form "2025-08-16"
+        """
+        d = time.time() + days * 24 * 3600
+        return datetime.datetime.fromtimestamp(d).strftime("%Y-%m-%d")
+
+    @staticmethod
+    def default() -> WorkflowExpiry:
+        return WorkflowExpiry(tag="", expiry=WorkflowExpiry.format_expiry(30))
+
+    def write(self, workflow_unique_id: str) -> None:
+        base_directory = workflow_unique_id
+        filename = DIRECTORY_REPORTS_METADATA / base_directory / FILENAME_EXPIRY
+        filename.parent.mkdir(parents=True, exist_ok=True)
+        json_text = json.dumps(dataclasses.asdict(self), indent=4)
+        filename.write_text(json_text)
+
+    def trash(self, workflow_unique_id: str) -> bool:
+        base_directory = workflow_unique_id
+        directory = DIRECTORY_REPORTS / base_directory
+        if directory.is_dir():
+            shutil.rmtree(directory, ignore_errors=True)
+            return True
+        return False
+
+    @staticmethod
+    def read_or_default(workflow_unique_id: str) -> WorkflowExpiry:
+        base_directory = workflow_unique_id
+        expiry_json = DIRECTORY_REPORTS_METADATA / base_directory / FILENAME_EXPIRY
+        if expiry_json.is_file():
+            try:
+                json_text = expiry_json.read_text()
+                json_dict = json.loads(json_text)
+                return WorkflowExpiry(**json_dict)
+            except Exception as e:
+                logger.debug(f"{expiry_json}: {e!r}")
+
+        workflow_expiry = WorkflowExpiry.default()
+        workflow_expiry.write(workflow_unique_id=workflow_unique_id)
+        return workflow_expiry
+
+
 class BaseDirectory:
     """
     Example          self.text    self.number self.sortable
@@ -193,19 +266,22 @@ class BaseDirectory:
 class WorkflowReport:
     base_directory: BaseDirectory
     job: WorkflowJob | None
+    expiry: WorkflowExpiry
     input: WorkflowInput | None
     result_context: ResultContext | None
 
     def __post_init__(self) -> None:
         assert isinstance(self.base_directory, BaseDirectory)
         assert isinstance(self.job, WorkflowJob | None)
+        assert isinstance(self.expiry, WorkflowExpiry)
         assert isinstance(self.input, WorkflowInput | None)
         assert isinstance(self.result_context, ResultContext | None)
 
     @classmethod
     def factory(cls, base_directory: str) -> WorkflowReport:
-        workflow_job = None
+        workflow_job: WorkflowJob | None = None
         workflow_input: WorkflowInput | None = None
+        workflow_expiry = WorkflowExpiry.default()
         result_context: ResultContext | None = None
 
         gh_list_json = (
@@ -218,6 +294,10 @@ class WorkflowReport:
                 workflow_job = WorkflowJob(**json_dict)
             except Exception as e:
                 logger.debug(f"{gh_list_json}: {e!r}")
+
+        workflow_expiry = WorkflowExpiry.read_or_default(
+            workflow_unique_id=base_directory
+        )
 
         inputs_json = DIRECTORY_REPORTS / base_directory / FILENAME_INPUTS_JSON
         if not inputs_json.is_file():
@@ -245,6 +325,7 @@ class WorkflowReport:
         return WorkflowReport(
             base_directory=BaseDirectory(base_directory=base_directory),
             job=workflow_job,
+            expiry=workflow_expiry,
             input=workflow_input,
             result_context=result_context,
         )
@@ -294,6 +375,49 @@ class WorkflowReport:
         except:  # noqa: E722  # pylint: disable=bare-except
             return Markup()
 
+    @property
+    def unique_id(self) -> str:
+        return self.base_directory.base_directory
+
+    @property
+    def expiry_dialog_id(self) -> str:
+        return f"expiry-dialog-{self.base_directory.base_directory}"
+
+    @property
+    def select_option_markup(self) -> Markup:
+        """
+        <option value="{{ workflow_report.expiry.expiry }}">{{ workflow_report.expiry.expiry }}</option>
+        <option value="never">never</option>
+        <option value="trash">trash</option>
+        """
+        values: list[tuple[str, str]] = []
+
+        assert self.expiry is not None
+        values.append((self.expiry.expiry, self.expiry.expiry))
+        for days, text in (
+            (1, "1 day"),
+            (7, "1 week"),
+            (30, "1 month"),
+            (180, "6 month"),
+        ):
+            date_text = WorkflowExpiry.format_expiry(days)
+            values.append((date_text, text))
+        values.append((EXPIRY_NEVER, "Never"))
+        values.append((EXPIRY_TRASH, "Trash now!!!"))
+
+        return Markup("".join([f'<option value="{d}">{t}</option>' for d, t in values]))
+
+    @property
+    def expired(self) -> bool:
+        return self.expiry.expired
+
+    @property
+    def trash_if_expired(self) -> bool:
+        if self.expiry.expired:
+            return self.expiry.trash(workflow_unique_id=self.unique_id)
+
+        return False
+
 
 def gh_list() -> pathlib.Path | None:
     """
@@ -316,7 +440,7 @@ def gh_list() -> pathlib.Path | None:
     return next_directory_metadata
 
 
-def render_reports() -> list:
+def list_reports(including_expired=False) -> list:
     def report_names_sorted() -> set[str]:
         set_reports = set()
         for d in (DIRECTORY_REPORTS, DIRECTORY_REPORTS_METADATA):
@@ -326,11 +450,14 @@ def render_reports() -> list:
                         set_reports.add(f.name)
         return set_reports
 
+    workflows = [
+        WorkflowReport.factory(base_directory)
+        for base_directory in report_names_sorted()
+    ]
+    if not including_expired:
+        workflows = [w for w in workflows if not w.expired]
     return sorted(
-        [
-            WorkflowReport.factory(base_directory)
-            for base_directory in report_names_sorted()
-        ],
+        workflows,
         key=lambda wr: wr.base_directory.sortable,
         reverse=True,
     )

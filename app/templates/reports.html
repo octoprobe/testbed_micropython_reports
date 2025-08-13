@@ -10,17 +10,18 @@ Octoprobe - testbed_micropython
     <a href="/?read_github=1"><img src="/static/bootstrap_arrow-clockwise.svg" title="update github actions" /></a>
     -->
 </h1>
+
 <table>
     <thead>
         <tr>
             <th>github #<br />conclusion</th>
             <th>started<br />duration</th>
             <th>repo tests<br />repo firmware</th>
-            <th>email<br />mptest arguments</th>
+            <th>email, tag, expiry<br />mptest arguments</th>
         </tr>
     </thead>
     <tbody>
-        {%- for workflow_report in workflow_reports %}
+        {%- for workflow_report in list_reports() %}
         <tr>
             <td>
                 {{ workflow_report.github_action_markup }}<br />
@@ -35,7 +36,35 @@ Octoprobe - testbed_micropython
                 {{ workflow_report.input.repo_firmware_markup }} {{ workflow_report.repo_firmware_commit_markup }}
             </td>
             <td>
-                {{ workflow_report.input.email_testreport }}<br />
+                {{ workflow_report.input.email_testreport }}
+                <dialog id="{{ workflow_report.expiry_dialog_id }}">
+                    <h3>Expiry of {{ workflow_report.unique_id }}</h3>
+                    <form method="dialog">
+                    <label for="tag">Tag:</label>
+                    <input list="tag-options" id="tag" name="tag" value="{{ workflow_report.expiry.tag }}">
+                    <datalist id="tag-options">
+                        <option value="">
+                        <option value="Testing octoprobe itself">
+                        <option value="Micropython release testing">
+                        <option value="Micropython branch testing">
+                    </datalist>
+                    <br>
+                    <label for="expiry">Expiry:</label>
+                    <select id="expiry" name="expiry" value="{{ workflow_report.expiry.expiry }}">
+                    {{ workflow_report.select_option_markup }}
+                    </select>
+                    <br>
+                    <menu>
+                    <button value="cancel">Cancel</button>
+                    <button value="ok" formaction="{{ request.path }}" formmethod="get">OK</button>
+                    </menu>
+                    <input type="hidden" name="workflow_unique_id" value="{{ workflow_report.unique_id }}">
+                    </form>
+                </dialog>
+                <button type="button" onclick="dlg=document.getElementById('{{ workflow_report.expiry_dialog_id }}'); dlg.showModal(); return false;">
+                    expiry {{ workflow_report.expiry.expiry }} {{ workflow_report.expiry.tag }}
+                </button>
+            <br />
                 {{ workflow_report.input.arguments }}
             </td>
         </tr>

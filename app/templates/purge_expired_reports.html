@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}
+Octoprobe - testbed_micropython
+{% endblock %}
+
+{% block content %}
+<h1>Expired Reports beeing purged</h1>
+
+{%- for workflow_report in list_reports(including_expired=True) %}
+{{ workflow_report.unique_id }} {{ workflow_report.expiry.expiry }} {% if workflow_report.trash_if_expired %}<b>PURGED</b>{% endif %}<br />
+{%- endfor %}
+
+{% endblock %}

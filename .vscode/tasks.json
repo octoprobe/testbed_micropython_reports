@@ -27,7 +27,7 @@
         {
             "label": "ruff",
             "type": "shell",
-            "command": "ruff check --config pyproject.toml --fix || true",
+            "command": ". ${workspaceFolder}/.venv/bin/activate && ruff check --config pyproject.toml --fix || true",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -40,7 +40,7 @@
         {
             "label": "mypy",
             "type": "shell",
-            "command": "python -m mypy --config-file pyproject.toml app tests || true",
+            "command": ". ${workspaceFolder}/.venv/bin/activate && python -m mypy --config-file pyproject.toml app tests || true",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
@@ -53,7 +53,7 @@
         {
             "label": "pylint",
             "type": "shell",
-            "command": "PYTHONPATH=${workspaceFolder} python -m pylint app tests || true",
+            "command": ". ${workspaceFolder}/.venv/bin/activate && PYTHONPATH=${workspaceFolder} python -m pylint app tests || true",
             "options": {
                 "cwd": "${workspaceFolder}"
             },
