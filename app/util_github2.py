@@ -115,8 +115,8 @@ class WorkflowJob:
         return self.convert_time(self.startedAt)
 
     @property
-    def started_at_markup(self) -> str:
-        return self.started_at.strftime("%Y-%m-%d_%H:%M")
+    def started_at_markup(self) -> Markup:
+        return Markup(self.started_at.strftime("%Y-%m-%d %H:%M"))
 
     @property
     def duration(self) -> datetime.timedelta:
@@ -139,8 +139,12 @@ class WorkflowJob:
             seconds -= m * 60
             return [h, m, seconds]
 
-        elements = split2(seconds)
-        return Markup(":".join([format(e, "02d") for e in elements]))
+        h, m, s = split2(seconds)
+        text = f"{h}h " if h > 0 else ""
+        text += f"{m}min"
+        return Markup(text)
+        # elements = split2(seconds)
+        # return Markup(":".join([format(e, "02d") for e in elements]))
 
     @property
     def base_directory(self) -> str:
