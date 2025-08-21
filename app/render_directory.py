@@ -81,11 +81,13 @@ def render_directory_or_file(
         media_type = {
             ".html": "text/html",
             ".txt": "text/plain",
+            ".out": "text/plain",
+            ".py": "text/plain",
             # ".spec": "text/plain",
             ".json": "text/json",
         }.get(directory.suffix, None)
+        content_bytes = directory.read_bytes()
         if media_type is None:
-            content_bytes = directory.read_bytes()
             try:
                 # Try if it is an ascii file
                 content_bytes.decode("ascii")
@@ -99,7 +101,21 @@ def render_directory_or_file(
                         "Content-Disposition": f"attachment; filename={directory.name}"
                     },
                 )
-        content_text = directory.read_text()
+        try:
+            content_text = content_bytes.decode(encoding="utf-8")
+        except UnicodeDecodeError:
+
+            def bytes_to_ascii_escape(data: bytes) -> str:
+                return "".join(
+                    chr(b) if (0x20 <= b <= 0x7E) or (b == 0x0A) else f"\\x{b:02x}"
+                    for b in data
+                )
+
+            content_text = (
+                "ATTENTION: Non utf-8 characters!\n\n"
+                + bytes_to_ascii_escape(content_bytes)
+            )
+
         return HTMLResponse(content=content_text, media_type=media_type)
 
     # List files and directories
