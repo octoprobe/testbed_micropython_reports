@@ -139,7 +139,7 @@ class WorkflowJob:
             seconds -= m * 60
             return [h, m, seconds]
 
-        h, m, s = split2(seconds)
+        h, m, _s = split2(seconds)
         text = f"{h}h " if h > 0 else ""
         text += f"{m}min"
         return Markup(text)

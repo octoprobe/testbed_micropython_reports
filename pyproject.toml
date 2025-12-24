@@ -70,7 +70,7 @@ source-includes = [
 
 [tool.mypy]
 # strict = true
-# enable_incomplete_feature = ["NewGenericSyntax"]
+warn_unused_ignores = false
 
 [[tool.mypy.overrides]]
 module = "markdown2.*"
