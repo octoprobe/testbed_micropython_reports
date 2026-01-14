@@ -11,9 +11,10 @@ import time
 
 from markupsafe import Markup
 from octoprobe.util_cached_git_repo import GitMetadata, GitSpec
-from testbed_micropython.report_test.util_testreport import (
-    FILENAME_CONTEXT_JSON,
-    ResultContext,
+from testbed_micropython.report_test import util_constants
+from testbed_micropython.report_test.util_baseclasses import ResultContext
+from testbed_micropython.report_test.util_push_testresults import (
+    DirectoryManualWorkflow,
 )
 
 from app.constants import (
@@ -42,6 +43,9 @@ class WorkflowInput:
     "Example: https://github.com/dpgeorge/micropython.git@tools-pyboard-add-serial-timeout"
     pullrequests: str = ""
     "TODO: Remove - obsolete"
+
+    def __post_init__(self) -> None:
+        pass
 
     @property
     def repo_firmware_markup(self) -> Markup:
@@ -101,6 +105,9 @@ class WorkflowJob:
     url: str
     "Example: https://github.com/octoprobe/testbed_micropython/actions/runs/15265040909"
 
+    def __post_init__(self) -> None:
+        pass
+
     @staticmethod
     def convert_time(text: str) -> datetime.datetime:
         return datetime.datetime.fromisoformat(text)
@@ -115,36 +122,18 @@ class WorkflowJob:
         return self.convert_time(self.startedAt)
 
     @property
-    def started_at_markup(self) -> Markup:
-        return Markup(self.started_at.strftime("%Y-%m-%d %H:%M"))
+    def started_at_text(self) -> str:
+        return self.started_at.strftime(util_constants.FORMAT_HTTP_STARTED_AT)
 
     @property
     def duration(self) -> datetime.timedelta:
         return self.convert_time(self.updatedAt) - self.started_at
 
     @property
-    def duration_markup(self) -> Markup:
-        seconds = self.duration.seconds
+    def duration_text(self) -> str:
         # seconds = 7975  # 2h, 12min, 55sec
 
-        def split(value: int) -> list[int]:
-            if value < 60:
-                return [value]
-            return split(value // 60) + [value % 60]
-
-        def split2(seconds: int) -> list[int]:
-            h = seconds // 3600
-            seconds -= h * 3600
-            m = seconds // 60
-            seconds -= m * 60
-            return [h, m, seconds]
-
-        h, m, _s = split2(seconds)
-        text = f"{h}h " if h > 0 else ""
-        text += f"{m}min"
-        return Markup(text)
-        # elements = split2(seconds)
-        # return Markup(":".join([format(e, "02d") for e in elements]))
+        return util_constants.seconds_to_duration(seconds=self.duration.seconds)
 
     @property
     def base_directory(self) -> str:
@@ -253,17 +242,40 @@ class BaseDirectory:
         assert isinstance(base_directory, str)
         self.base_directory = base_directory
 
-        match = self.RE_NUMBER.match(base_directory)
-        assert match is not None, base_directory
-        _number = match.group("number")
-        assert _number is not None, base_directory
-        self.number = int(_number)
-        self.text = match.group("text")
-        assert self.text is not None, base_directory
+        self.is_github_workflow = GITHUB_WORKFLOW in self.base_directory
+        """
+        True if: github_selfhosted_testrun_420
+        False if: local_hostname_20250116-185542
+        """
+
+        self.manual_workflow = DirectoryManualWorkflow.factory_directory(base_directory)
+        """
+        None if: github_selfhosted_testrun_420
+        otherwise: local_hostname_20250116-185542
+        """
+
+        assert (self.manual_workflow is None) is (self.is_github_workflow)
+
+        # local_hostname_20250116-185542
+        self.number = 0
+        self.text = self.base_directory
+
+        if self.manual_workflow is None:
+            # github_selfhosted_testrun_420
+            match = self.RE_NUMBER.match(base_directory)
+            assert match is not None, base_directory
+            _number = match.group("number")
+            assert _number is not None, base_directory
+            self.number = int(_number)
+            self.text = match.group("text")
+            assert self.text is not None, base_directory
 
     @property
     def sortable(self) -> str:
         return f"{self.text}_{self.number:010d}"
+        # if self.is_github_workflow:
+        #     return f"{self.text}_{self.number:010d}"
+        # return self.base_directory
 
 
 @dataclasses.dataclass(slots=True)
@@ -317,7 +329,9 @@ class WorkflowReport:
             except Exception as e:
                 logger.debug(f"{gh_list_json}: {e!r}")
 
-        context_json = DIRECTORY_REPORTS / base_directory / FILENAME_CONTEXT_JSON
+        context_json = (
+            DIRECTORY_REPORTS / base_directory / util_constants.FILENAME_CONTEXT_JSON
+        )
         if context_json.is_file():
             try:
                 json_text = context_json.read_text()
@@ -336,6 +350,9 @@ class WorkflowReport:
 
     @property
     def github_action_markup(self) -> Markup:
+        if self.base_directory.manual_workflow is not None:
+            # For example 'local_hostname_20250116_185542'
+            return Markup(self.base_directory.manual_workflow.date_short)
         number = self.base_directory.number
         if self.job is None:
             return Markup(str(number))
@@ -345,17 +362,29 @@ class WorkflowReport:
         )
 
     @property
+    def is_github_workflow(self) -> bool:
+        return self.base_directory.is_github_workflow
+
+    @property
     def conclusion_status_markup(self) -> Markup:
+        def markup(conclusion: str) -> Markup:
+            link = (
+                f"/{self.base_directory.base_directory}/octoprobe_summary_report.html"
+            )
+            return Markup(
+                f'<a href="{link}" target="_blank" title="Summary Report">{conclusion}</a>'
+            )
+
+        if not self.is_github_workflow:
+            # This reports where sent from a manually started 'mptest'
+            return markup(conclusion="success")
         if self.job is None:
             return Markup("???")
         if self.job.status in ("in_progress", "queued"):
             return Markup(self.job.status)
         if not (DIRECTORY_REPORTS / self.base_directory.base_directory).is_dir():
             return Markup("missing")
-        link = f"/{self.base_directory.base_directory}/octoprobe_summary_report.html"
-        return Markup(
-            f'<a href="{link}" target="_blank" title="Summary Report">{self.job.conclusion}</a>'
-        )
+        return markup(conclusion=self.job.conclusion)
 
     @property
     def repo_tests_commit_markup(self) -> Markup:
@@ -422,6 +451,48 @@ class WorkflowReport:
 
         return False
 
+    @property
+    def started_at_text(self) -> str:
+        if self.job is None:
+            assert self.base_directory.manual_workflow is not None
+            return self.base_directory.manual_workflow.datetime_text
+        return self.job.started_at_text
+
+    @property
+    def duration_text(self) -> str:
+        if self.result_context is not None:
+            return Markup(self.result_context.time_duration_text)
+        if self.job is None:
+            return "-"
+        return self.job.duration_text
+
+    @property
+    def repo_firmware_markup(self) -> Markup | str:
+        if self.input is None:
+            assert self.result_context is not None
+            return self.result_context.ref_firmware
+        return self.input.repo_firmware_markup
+
+    @property
+    def repo_tests_markup(self) -> Markup | str:
+        if self.input is None:
+            assert self.result_context is not None
+            return self.result_context.ref_tests
+        return self.input.repo_tests_markup
+
+    @property
+    def email_testreport(self) -> str:
+        if self.input is None:
+            return self.base_directory.base_directory
+        return self.input.email_testreport
+
+    @property
+    def arguments(self) -> str:
+        if self.input is None:
+            assert self.result_context is not None
+            return self.result_context.commandline
+        return self.input.arguments
+
 
 def gh_list() -> pathlib.Path | None:
     """
@@ -445,18 +516,16 @@ def gh_list() -> pathlib.Path | None:
 
 
 def list_reports(including_expired=False) -> list:
-    def report_names_sorted() -> set[str]:
+    def report_names() -> set[str]:
         set_reports = set()
         for d in (DIRECTORY_REPORTS, DIRECTORY_REPORTS_METADATA):
             for f in d.glob(pattern="*"):
                 if f.is_dir():
-                    if f.name.find(GITHUB_WORKFLOW) >= 0:
-                        set_reports.add(f.name)
+                    set_reports.add(f.name)
         return set_reports
 
     workflows = [
-        WorkflowReport.factory(base_directory)
-        for base_directory in report_names_sorted()
+        WorkflowReport.factory(base_directory) for base_directory in report_names()
     ]
     if not including_expired:
         workflows = [w for w in workflows if not w.expired]

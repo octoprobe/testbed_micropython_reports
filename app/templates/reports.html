@@ -28,15 +28,15 @@ Octoprobe - testbed_micropython
                 {{ workflow_report.conclusion_status_markup }}
             </td>
             <td>
-                <div style="white-space: nowrap;">{{ workflow_report.job.started_at_markup }}</div>
-                {{ workflow_report.job.duration_markup }}
+                <div style="white-space: nowrap;">{{ workflow_report.started_at_text }}</div>
+                {{ workflow_report.duration_text }}
             </td>
             <td>
-                {{ workflow_report.input.repo_tests_markup }} {{ workflow_report.repo_tests_commit_markup }}<br />
-                {{ workflow_report.input.repo_firmware_markup }} {{ workflow_report.repo_firmware_commit_markup }}
+                {{ workflow_report.repo_tests_markup }} {{ workflow_report.repo_tests_commit_markup }}<br />
+                {{ workflow_report.repo_firmware_markup }} {{ workflow_report.repo_firmware_commit_markup }}
             </td>
             <td>
-                {{ workflow_report.input.email_testreport }}
+                {{ workflow_report.email_testreport }}
                 <dialog id="{{ workflow_report.expiry_dialog_id }}">
                     <h3>Expiry of {{ workflow_report.unique_id }}</h3>
                     <form method="dialog">
@@ -65,7 +65,7 @@ Octoprobe - testbed_micropython
                     expiry {{ workflow_report.expiry.expiry }} {{ workflow_report.expiry.tag }}
                 </button>
             <br />
-                {{ workflow_report.input.arguments }}
+                {{ workflow_report.arguments }}
             </td>
         </tr>
         {%- endfor %}
