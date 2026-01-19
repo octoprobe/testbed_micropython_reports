@@ -352,7 +352,7 @@ class WorkflowReport:
     def github_action_markup(self) -> Markup:
         if self.base_directory.manual_workflow is not None:
             # For example 'local_hostname_20250116_185542'
-            return Markup(self.base_directory.manual_workflow.date_short)
+            return Markup(self.base_directory.manual_workflow.started_ad_short)
         number = self.base_directory.number
         if self.job is None:
             return Markup(str(number))
@@ -455,7 +455,7 @@ class WorkflowReport:
     def started_at_text(self) -> str:
         if self.job is None:
             assert self.base_directory.manual_workflow is not None
-            return self.base_directory.manual_workflow.datetime_text
+            return self.base_directory.manual_workflow.started_at_text
         return self.job.started_at_text
 
     @property
