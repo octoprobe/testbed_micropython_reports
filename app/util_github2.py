@@ -377,7 +377,11 @@ class WorkflowReport:
 
         if not self.is_github_workflow:
             # This reports where sent from a manually started 'mptest'
-            return markup(conclusion="success")
+            conclusion = "success"
+            if self.result_context is not None:
+                if self.result_context.error != "":
+                    conclusion = self.result_context.error
+            return markup(conclusion=conclusion)
         if self.job is None:
             return Markup("???")
         if self.job.status in ("in_progress", "queued"):
