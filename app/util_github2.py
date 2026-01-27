@@ -368,9 +368,7 @@ class WorkflowReport:
     @property
     def conclusion_status_markup(self) -> Markup:
         def markup(conclusion: str) -> Markup:
-            link = (
-                f"/{self.base_directory.base_directory}/octoprobe_summary_report.html"
-            )
+            link = f"/{self.base_directory.base_directory}/{util_constants.FILENAME_OCTOPROBE_SUMMARY_REPORT_STEM}.html"
             return Markup(
                 f'<a href="{link}" target="_blank" title="Summary Report">{conclusion}</a>'
             )

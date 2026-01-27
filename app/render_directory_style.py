@@ -1,6 +1,8 @@
 import enum
 import re
 
+from testbed_micropython.report_test import util_constants
+
 
 class ListingStyle(enum.StrEnum):
     GRAY = "gray"
@@ -27,7 +29,10 @@ LIST_RE_2_STYLE = [
     # Logfiles
     (re.compile(r"/journalctl.txt$"), ListingStyle.BLACK),
     (re.compile(r"/logger_20_info.log$"), ListingStyle.GREEN),
-    (re.compile(r"/octoprobe_summary_report.html$"), ListingStyle.GREEN),
+    (
+        re.compile(rf"/{util_constants.FILENAME_OCTOPROBE_SUMMARY_REPORT_STEM}.html$"),
+        ListingStyle.GREEN,
+    ),
     (re.compile(r"/task_report.md$"), ListingStyle.BLACK),
     (re.compile(r"/testresults.txt$"), ListingStyle.BLACK),
     (re.compile(r"/flashing_stdout.txt$"), ListingStyle.BLACK),
