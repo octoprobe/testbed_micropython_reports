@@ -126,6 +126,7 @@ celerybeat.pid
 
 # Environments
 .env
+kibana_docker/elastic-start-local/.env
 .venv
 env/
 venv/

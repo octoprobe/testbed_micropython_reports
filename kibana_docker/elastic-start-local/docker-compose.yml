@@ -5,7 +5,8 @@ services:
     volumes:
       - dev-elasticsearch:/usr/share/elasticsearch/data
     ports:
-      - 127.0.0.1:${ES_LOCAL_PORT}:9200
+      # - 127.0.0.1:${ES_LOCAL_PORT}:9200
+      - ${APP_HOST}:${ES_LOCAL_PORT}:9200
     extra_hosts:
       - host.docker.internal:host-gateway
       - model-runner.docker.internal:host-gateway
@@ -65,7 +66,8 @@ services:
       - dev-kibana:/usr/share/kibana/data
       - ./config/telemetry.yml:/usr/share/kibana/config/telemetry.yml
     ports:
-      - 127.0.0.1:${KIBANA_LOCAL_PORT}:5601
+      # - 127.0.0.1:${KIBANA_LOCAL_PORT}:5601
+      - ${APP_HOST}:${KIBANA_LOCAL_PORT}:5601
     extra_hosts:
       - host.docker.internal:host-gateway
       - model-runner.docker.internal:host-gateway
