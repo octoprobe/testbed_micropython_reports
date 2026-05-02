@@ -349,6 +349,10 @@ class WorkflowReport:
         )
 
     @property
+    def is_valid(self) -> bool:
+        return (self.input is not None) or (self.result_context is not None)
+
+    @property
     def github_action_markup(self) -> Markup:
         if self.base_directory.manual_workflow is not None:
             # For example 'local_hostname_20250116_185542'
@@ -529,6 +533,7 @@ def list_reports(including_expired=False) -> list:
     workflows = [
         WorkflowReport.factory(base_directory) for base_directory in report_names()
     ]
+    workflows = [w for w in workflows if w.is_valid]
     if not including_expired:
         workflows = [w for w in workflows if not w.expired]
     return sorted(
