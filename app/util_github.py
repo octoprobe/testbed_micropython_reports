@@ -3,6 +3,7 @@ import os
 import subprocess
 
 from pydantic import BaseModel
+from testbed_micropython.pr_check import util_github
 
 from app.constants import GITHUB_EVENT, GITHUB_REPO, GITHUB_WORKFLOW
 
@@ -13,19 +14,6 @@ MOCKED_GITHUB_RESULTS = False
 
 # Provoke errors if the environment variable is NOT defined
 EMAIL_USERS: list[str] = os.environ["EMAIL_USERS"].split(",")
-
-
-def subprocess_json(args: list[str]) -> dict | list:
-    try:
-        result = subprocess.run(args=args, capture_output=True, text=True, check=True)
-        data = json.loads(result.stdout)
-        return data
-    except subprocess.CalledProcessError as e:
-        print(f"Error executing command: {e}")
-        raise
-    except json.JSONDecodeError as e:
-        print(f"Error decoding JSON: {e}")
-        raise
 
 
 # TODO: This method may probably be removed!
@@ -55,8 +43,8 @@ def gh_jobs_obsolete() -> list[dict[str, str | int]]:
             "name,number,status,conclusion,url,event,createdAt,startedAt",
         ]
 
-        data = subprocess_json(args=args)
-        list_result.extend(data)
+        data = util_github.subprocess_json(args=args)
+        list_result.extend(data)  # type: ignore
     return list_result
 
 
@@ -85,7 +73,7 @@ def gh_list2() -> list[dict[str, str | int]]:
         "attempt,conclusion,createdAt,event,name,number,startedAt,status,updatedAt,url",
     ]
 
-    data = subprocess_json(args=args)
+    data = util_github.subprocess_json(args=args)
     assert isinstance(data, list)
     return data
 
@@ -104,7 +92,7 @@ def gh_resolve_email(username: str) -> str | None:
             f"users/{username}",
         ]
 
-        return subprocess_json(args=args)
+        return util_github.subprocess_json(args=args)
 
     data = get_result()
     assert isinstance(data, dict)
