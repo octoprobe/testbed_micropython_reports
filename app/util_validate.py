@@ -49,7 +49,7 @@ def validate_pr(form_startjob_pr: FormStartJobPr) -> ReturncodeStartJob:
     p = util_pr_check.PrCheck.factory(git_ref=git_ref)
 
     ports_comma_delimited = ",".join(p.json_pr_ports.ports)
-    form_startjob_pr.arguments = f"--only_tag='mcu={ports_comma_delimited}'"
+    form_startjob_pr.arguments = f"--only-tag='mcu={ports_comma_delimited}'"
     form_startjob_pr.repo_firmware = git_ref
     form_startjob_pr.repo_tests = git_ref
     form_startjob_pr.username = USER_HMAERKI
