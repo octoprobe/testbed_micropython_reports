@@ -13,7 +13,6 @@ from fastapi.templating import Jinja2Templates
 from app import util_logging, util_validate
 from app.util_github import (
     FormStartJob,
-    FormStartJobPr,
     ReturncodeStartJob,
     gh_start_job,
 )
@@ -45,28 +44,14 @@ def read_root(request: Request):
     return JINJA2_TEMPLATES.TemplateResponse("index.html", {"request": request})
 
 
-def _index_start_pr(
-    request: Request,
-    form_startjob_pr: FormStartJobPr,
-    form_rc: ReturncodeStartJob,
-) -> HTMLResponse:
-    return JINJA2_TEMPLATES.TemplateResponse(
-        "jobs_pr.html",
-        {
-            "request": request,
-            "form_startjob_pr": form_startjob_pr,
-            "form_rc": form_rc,
-        },
-    )
-
-
 def _index_start(
     request: Request,
     form_startjob: FormStartJob,
     form_rc: ReturncodeStartJob,
+    file_html: str,
 ) -> HTMLResponse:
     return JINJA2_TEMPLATES.TemplateResponse(
-        "jobs.html",
+        file_html,
         {
             "request": request,
             "form_startjob": form_startjob,
@@ -75,51 +60,57 @@ def _index_start(
     )
 
 
-@app.get("/jobs/start_pr")
-def jobs_start_pr_GET(request: Request):
-    return _index_start_pr(
-        request=request,
-        form_startjob_pr=FormStartJobPr(),
-        form_rc=ReturncodeStartJob(),
-    )
-
-
 @app.post("/jobs/start_pr")
 def jobs_start_pr_POST(
-    request: Request, form_startjob_pr: typing.Annotated[FormStartJobPr, Form()]
+    request: Request, form_startjob: typing.Annotated[FormStartJob, Form()]
 ):
     # form_data = await request.form()
     # action = form_data.get("action", "start")
     # Need to examine which will be the next job number
-    assert isinstance(form_startjob_pr, FormStartJobPr)
+    assert isinstance(form_startjob, FormStartJob)
 
-    form_rc_pr = util_validate.validate_pr(form_startjob_pr=form_startjob_pr)
+    form_rc_pr = util_validate.validate_pr(form_startjob=form_startjob)
 
-    if form_startjob_pr.action == "validate":
-        return _index_start_pr(
+    if form_startjob.action == "validate":
+        return _index_start(
             request=request,
-            form_startjob_pr=form_startjob_pr,
+            form_startjob=form_startjob,
             form_rc=form_rc_pr,
+            file_html="jobs_pr.html",
         )
 
     if form_rc_pr.msg_error:
-        return _index_start_pr(
+        return _index_start(
             request=request,
-            form_startjob_pr=form_startjob_pr,
+            form_startjob=form_startjob,
             form_rc=form_rc_pr,
+            file_html="jobs_pr.html",
         )
 
     next_directory_metadata = gh_list()
     if next_directory_metadata is not None:
         save_as_workflow_input(
-            form_startjob=form_startjob_pr,
+            form_startjob=form_startjob,
             directory_metadata=next_directory_metadata,
         )
-    form_rc = gh_start_job(form_startjob=form_startjob_pr)
-    return _index_start_pr(
+    form_rc = gh_start_job(form_startjob=form_startjob)
+    return _index_start(
         request=request,
-        form_startjob_pr=form_startjob_pr,
+        form_startjob=form_startjob,
         form_rc=form_rc,
+        file_html="jobs_pr.html",
+    )
+
+
+@app.get("/jobs/start_pr")
+def jobs_start_pr_GET(request: Request):
+    form_startjob = FormStartJob()
+    form_startjob.pr_number = "17782"
+    return _index_start(
+        request=request,
+        form_startjob=form_startjob,
+        form_rc=ReturncodeStartJob(),
+        file_html="jobs_pr.html",
     )
 
 
@@ -129,6 +120,7 @@ def jobs_start_GET(request: Request):
         request=request,
         form_startjob=FormStartJob(),
         form_rc=ReturncodeStartJob(),
+        file_html="jobs.html",
     )
 
 
@@ -146,6 +138,7 @@ def jobs_start_POST(
             request=request,
             form_startjob=form_startjob,
             form_rc=form_rc,
+            file_html="jobs.html",
         )
 
     next_directory_metadata = gh_list()
@@ -163,6 +156,7 @@ def jobs_start_POST(
         request=request,
         form_startjob=form_startjob,
         form_rc=form_rc,
+        file_html="jobs.html",
     )
 
 

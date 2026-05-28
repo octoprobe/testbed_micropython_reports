@@ -106,6 +106,7 @@ class FormStartJob(BaseModel):
     arguments: str | None = ""
     repo_tests: str | None = "https://github.com/micropython/micropython.git@master"
     repo_firmware: str | None = "https://github.com/micropython/micropython.git@master"
+    pr_number: str | None = ""
 
     @staticmethod
     def arguments_prefilled() -> list[str]:
@@ -116,10 +117,6 @@ class FormStartJob(BaseModel):
             "--only-board=LOLIN_D1_MINI --skip-test=RUN-MULTITESTS_MULTINET",
             "--only-test='RUN-TESTS_STANDARD:run-tests.py --test-dirs=micropython' --only-board=RPI_PICO2-RISCV",
         ]
-
-
-class FormStartJobPr(FormStartJob):
-    pr_number: str | None = "17782"
 
 
 class ReturncodeStartJob(BaseModel):
@@ -157,6 +154,8 @@ def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
         "run",
         "selfhosted_testrun.yml",
         "--repo=octoprobe/testbed_micropython",
+        "--field",
+        f"pr_number={form_startjob.pr_number}",
         "--field",
         f"arguments={form_startjob.arguments}",
         "--field",

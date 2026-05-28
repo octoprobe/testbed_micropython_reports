@@ -8,7 +8,6 @@ from testbed_micropython.pr_check import util_pr_check
 
 from app.util_github import (
     FormStartJob,
-    FormStartJobPr,
     ReturncodeStartJob,
     USER_HMAERKI,
     USER_NOBODY,
@@ -33,9 +32,9 @@ def fix_repos(form_startjob: FormStartJob) -> None:
     form_startjob.repo_tests = fix_repo(form_startjob.repo_tests)
 
 
-def validate_pr(form_startjob_pr: FormStartJobPr) -> ReturncodeStartJob:
-    assert isinstance(form_startjob_pr.pr_number, str)
-    pr_number_text = form_startjob_pr.pr_number.strip()
+def validate_pr(form_startjob: FormStartJob) -> ReturncodeStartJob:
+    assert isinstance(form_startjob.pr_number, str)
+    pr_number_text = form_startjob.pr_number.strip()
     try:
         pr_number = int(pr_number_text)
     except ValueError:
@@ -49,10 +48,10 @@ def validate_pr(form_startjob_pr: FormStartJobPr) -> ReturncodeStartJob:
     p = util_pr_check.PrCheck.factory(git_ref=git_ref)
 
     ports_comma_delimited = ",".join(p.json_pr_ports.ports)
-    form_startjob_pr.arguments = f"--only-tag='mcu={ports_comma_delimited}'"
-    form_startjob_pr.repo_firmware = git_ref
-    form_startjob_pr.repo_tests = git_ref
-    form_startjob_pr.username = USER_HMAERKI
+    form_startjob.arguments = f"--only-tag='mcu={ports_comma_delimited}'"
+    form_startjob.repo_firmware = git_ref
+    form_startjob.repo_tests = git_ref
+    form_startjob.username = USER_HMAERKI
 
     stdout = io.StringIO()
     stdout.write("<br/>\n".join(p.lines))
