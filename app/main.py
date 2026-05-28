@@ -10,8 +10,10 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from app import util_logging, util_validate
 from app.util_github import (
     FormStartJob,
+    FormStartJobPr,
     ReturncodeStartJob,
     gh_start_job,
 )
@@ -21,8 +23,6 @@ from app.util_github2 import (
     list_reports,
     save_as_workflow_input,
 )
-from app.util_logging import init_logging
-from app.util_validate import validate_repos
 
 from .constants import DIRECTORY_REPORTS
 from .render_directory import render_directory_or_file
@@ -30,7 +30,7 @@ from .render_log import SEVERITY_DEFAULT
 
 logger = logging.getLogger(__file__)
 
-init_logging(level=logging.INFO)
+util_logging.init_logging(level=logging.INFO)
 
 app = FastAPI()
 
@@ -45,7 +45,22 @@ def read_root(request: Request):
     return JINJA2_TEMPLATES.TemplateResponse("index.html", {"request": request})
 
 
-def _jobs_response(
+def _index_start_pr(
+    request: Request,
+    form_startjob_pr: FormStartJobPr,
+    form_rc: ReturncodeStartJob,
+) -> HTMLResponse:
+    return JINJA2_TEMPLATES.TemplateResponse(
+        "jobs_pr.html",
+        {
+            "request": request,
+            "form_startjob_pr": form_startjob_pr,
+            "form_rc": form_rc,
+        },
+    )
+
+
+def _index_start(
     request: Request,
     form_startjob: FormStartJob,
     form_rc: ReturncodeStartJob,
@@ -60,9 +75,57 @@ def _jobs_response(
     )
 
 
+@app.get("/jobs/start_pr")
+def jobs_start_pr_GET(request: Request):
+    return _index_start_pr(
+        request=request,
+        form_startjob_pr=FormStartJobPr(),
+        form_rc=ReturncodeStartJob(),
+    )
+
+
+@app.post("/jobs/start_pr")
+def jobs_start_pr_POST(
+    request: Request, form_startjob_pr: typing.Annotated[FormStartJobPr, Form()]
+):
+    # form_data = await request.form()
+    # action = form_data.get("action", "start")
+    # Need to examine which will be the next job number
+    assert isinstance(form_startjob_pr, FormStartJobPr)
+
+    form_rc_pr = util_validate.validate_pr(form_startjob_pr=form_startjob_pr)
+
+    if form_startjob_pr.action == "validate":
+        return _index_start_pr(
+            request=request,
+            form_startjob_pr=form_startjob_pr,
+            form_rc=form_rc_pr,
+        )
+
+    if form_rc_pr.msg_error:
+        return _index_start_pr(
+            request=request,
+            form_startjob_pr=form_startjob_pr,
+            form_rc=form_rc_pr,
+        )
+
+    next_directory_metadata = gh_list()
+    if next_directory_metadata is not None:
+        save_as_workflow_input(
+            form_startjob=form_startjob_pr,
+            directory_metadata=next_directory_metadata,
+        )
+    form_rc = gh_start_job(form_startjob=form_startjob_pr)
+    return _index_start_pr(
+        request=request,
+        form_startjob_pr=form_startjob_pr,
+        form_rc=form_rc,
+    )
+
+
 @app.get("/jobs/start")
-def jobs_index_get(request: Request):
-    return _jobs_response(
+def jobs_start_GET(request: Request):
+    return _index_start(
         request=request,
         form_startjob=FormStartJob(),
         form_rc=ReturncodeStartJob(),
@@ -70,15 +133,16 @@ def jobs_index_get(request: Request):
 
 
 @app.post("/jobs/start")
-def jobs_index_post(
+def jobs_start_POST(
     request: Request, form_startjob: typing.Annotated[FormStartJob, Form()]
 ):
     # form_data = await request.form()
     # action = form_data.get("action", "start")
     # Need to examine which will be the next job number
+    assert isinstance(form_startjob, FormStartJob)
     if form_startjob.action == "validate":
-        form_rc = validate_repos(form_startjob=form_startjob)
-        return _jobs_response(
+        form_rc = util_validate.validate_repos(form_startjob=form_startjob)
+        return _index_start(
             request=request,
             form_startjob=form_startjob,
             form_rc=form_rc,
@@ -95,7 +159,7 @@ def jobs_index_post(
         # It typically takes some time till the new job appears in the list
         # time.sleep(2.0)
         pass
-    return _jobs_response(
+    return _index_start(
         request=request,
         form_startjob=form_startjob,
         form_rc=form_rc,

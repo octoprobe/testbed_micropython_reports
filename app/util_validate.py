@@ -4,8 +4,15 @@ import pathlib
 
 from octoprobe.util_cached_git_repo import CachedGitRepo, GitSpec
 from octoprobe.util_subprocess import SubprocessExitCodeException
+from testbed_micropython.pr_check import util_pr_check
 
-from app.util_github import FormStartJob, ReturncodeStartJob, USER_NOBODY
+from app.util_github import (
+    FormStartJob,
+    FormStartJobPr,
+    ReturncodeStartJob,
+    USER_HMAERKI,
+    USER_NOBODY,
+)
 
 DIRECTORY_CACHE = pathlib.Path("/tmp/git_cache")
 
@@ -24,6 +31,33 @@ def fix_repos(form_startjob: FormStartJob) -> None:
 
     form_startjob.repo_firmware = fix_repo(form_startjob.repo_firmware)
     form_startjob.repo_tests = fix_repo(form_startjob.repo_tests)
+
+
+def validate_pr(form_startjob_pr: FormStartJobPr) -> ReturncodeStartJob:
+    assert isinstance(form_startjob_pr.pr_number, str)
+    pr_number_text = form_startjob_pr.pr_number.strip()
+    try:
+        pr_number = int(pr_number_text)
+    except ValueError:
+        form_rc = ReturncodeStartJob(
+            msg_error="Failed: '{pr_number_text}' is not a number",
+        )
+        return form_rc
+
+    git_ref = f"https://github.com/micropython/micropython.git~{pr_number}"
+
+    p = util_pr_check.PrCheck.factory(git_ref=git_ref)
+
+    ports_comma_delimited = ",".join(p.json_pr_ports.ports)
+    form_startjob_pr.arguments = f"--only_tag='mcu={ports_comma_delimited}'"
+    form_startjob_pr.repo_firmware = git_ref
+    form_startjob_pr.repo_tests = git_ref
+    form_startjob_pr.username = USER_HMAERKI
+
+    stdout = io.StringIO()
+    stdout.write("<br/>\n".join(p.lines))
+    form_rc = ReturncodeStartJob(msg_ok="Ok", stdout=stdout.getvalue())
+    return form_rc
 
 
 def validate_repos(form_startjob: FormStartJob) -> ReturncodeStartJob:

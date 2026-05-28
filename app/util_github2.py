@@ -460,7 +460,8 @@ class WorkflowReport:
     @property
     def started_at_text(self) -> str:
         if self.job is None:
-            assert self.base_directory.manual_workflow is not None
+            if self.base_directory.manual_workflow is None:
+                return "??"
             return self.base_directory.manual_workflow.started_at_text
         return self.job.started_at_text
 

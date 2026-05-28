@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}
+Octoprobe - testbed_micropython
+{% endblock %}
+
+{% block content %}
+<style>
+  table {
+    border-collapse: collapse;
+  }
+
+  td {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+
+  input {
+    width: 100%;
+    border-color: lightgray;
+    border-width: 1px;
+  }
+
+  tfoot {
+    background-color: lightgray;
+    color: darkgray;
+  }
+
+  tfoot input {
+    color: darkgray;
+  }
+</style>
+
+<h1>Start PR</h1>
+
+<div style="border: 1px solid lightblue; background-color: #f0f8ff; padding: 10px; margin-bottom: 20px;">
+  This will start a test on a PR.
+  <br />
+  After the test finished, a report will be attached as a comment to the PR.
+</div>
+
+<form method="post" action="/jobs/start_pr">
+  <table style="width: auto;">
+    <tbody>
+      <tr>
+        <td><label for="pr_number">PR number:</label></td>
+        <td><input type="text" id="pr_number" name="pr_number" value="{{ form_startjob_pr.pr_number }}">
+          <br />
+          Valid PRs: <a target="blank_"
+            href="https://github.com/micropython/micropython/pulls">https://github.com/micropython/micropython/pulls</a>
+        </td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td><label for="arguments">Arguments</label></td>
+        <td>
+          <input type="text" id="arguments" name="arguments" value="{{ form_startjob_pr.arguments }}">
+        </td>
+      </tr>
+      <tr>
+        <td><label for="repo_tests">Tests</label></td>
+        <td><input type="text" id="repo_tests" name="repo_tests" required, value="{{ form_startjob_pr.repo_tests }}"
+            readonly><br />
+          The repo/branch for the testcode.
+        </td>
+      </tr>
+      <tr>
+        <td><label for="repo_firmware">Firmware</label></td>
+        <td><input type="text" id="repo_firmware" name="repo_firmware" value="{{ form_startjob_pr.repo_firmware }}"
+            readonly>
+          <br />
+          The repo/branch to build the firmware.
+        </td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <p>
+    <button type="submit" name="action" value="validate"
+      onclick="this.innerHTML='VALIDATE ⏳'; this.style.cursor='wait';">
+      VALIDATE
+    </button>
+    <button type="submit" name="action" value="start" {{ form_rc.button_start_disabled }}
+      onclick="this.innerHTML='START ⏳'; this.style.cursor='wait';">
+      START
+    </button>
+  </p>
+
+  {%- if form_rc.msg_ok %}
+  <h2 style="color: green;">{{ form_rc.msg_ok }}</h2>
+  {%- endif %}
+  {%- if form_rc.msg_error %}
+  <h2 style="color: red;">{{ form_rc.msg_error }}</h2>
+  {%- endif %}
+
+</form>
+
+{%- if form_rc.stdout %}
+<div style="border: 1px solid green; background-color: rgb(228, 255, 228); padding: 10px; margin-bottom: 20px;">
+  {{ form_rc.stdout | safe }}
+</div>
+{%- endif %}
+
+{%- if form_rc.stderr %}
+<div style="border: 1px solid red; background-color: rgb(248, 188, 165); padding: 10px; margin-bottom: 20px;">
+  <pre style="font-size: small;">{{ form_rc.stderr | safe }}</pre>
+</div>
+{%- endif %}
+
+{%- endblock %}

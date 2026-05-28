@@ -10,6 +10,7 @@ from app.constants import GITHUB_EVENT, GITHUB_REPO, GITHUB_WORKFLOW
 from . import util_github_mockdata
 
 USER_NOBODY = "nobody"
+USER_HMAERKI = "hmaerki"
 MOCKED_GITHUB_RESULTS = False
 
 # Provoke errors if the environment variable is NOT defined
@@ -115,6 +116,10 @@ class FormStartJob(BaseModel):
             "--only-board=LOLIN_D1_MINI --skip-test=RUN-MULTITESTS_MULTINET",
             "--only-test='RUN-TESTS_STANDARD:run-tests.py --test-dirs=micropython' --only-board=RPI_PICO2-RISCV",
         ]
+
+
+class FormStartJobPr(FormStartJob):
+    pr_number: str | None = "17782"
 
 
 class ReturncodeStartJob(BaseModel):
