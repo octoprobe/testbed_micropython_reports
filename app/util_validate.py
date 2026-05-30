@@ -52,6 +52,7 @@ def validate_pr(form_startjob: FormStartJob) -> ReturncodeStartJob:
     form_startjob.repo_firmware = git_ref
     form_startjob.repo_tests = git_ref
     form_startjob.username = USER_HMAERKI
+    form_startjob.pr_repo = p.json_pr_ports.pr_repo
 
     stdout = io.StringIO()
     stdout.write("<br/>\n".join(p.lines))

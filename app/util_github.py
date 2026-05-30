@@ -106,7 +106,8 @@ class FormStartJob(BaseModel):
     arguments: str | None = ""
     repo_tests: str | None = "https://github.com/micropython/micropython.git@master"
     repo_firmware: str | None = "https://github.com/micropython/micropython.git@master"
-    pr_number: str | None = ""
+    pr_number: str = ""
+    pr_repo: str = ""
 
     @staticmethod
     def arguments_prefilled() -> list[str]:
@@ -156,6 +157,8 @@ def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
         "--repo=octoprobe/testbed_micropython",
         "--field",
         f"pr_number={form_startjob.pr_number}",
+        "--field",
+        f"pr_repo={form_startjob.pr_repo}",
         "--field",
         f"arguments={form_startjob.arguments}",
         "--field",
