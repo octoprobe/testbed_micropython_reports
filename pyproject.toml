@@ -175,6 +175,7 @@ disable = '''
     cyclic-import,
     fixme,
     import-outside-toplevel,
+    invalid-name,
     line-too-long,
     logging-fstring-interpolation,
     missing-class-docstring,

@@ -33,6 +33,10 @@ LIST_RE_2_STYLE = [
         re.compile(rf"/{util_constants.FILENAME_OCTOPROBE_SUMMARY_REPORT_STEM}.html$"),
         ListingStyle.GREEN,
     ),
+    (
+        re.compile(rf"/{util_constants.FILENAME_OCTOPROBE_PR_REPORT_STEM}.html$"),
+        ListingStyle.GREEN,
+    ),
     (re.compile(r"/task_report.md$"), ListingStyle.BLACK),
     (re.compile(r"/testresults.txt$"), ListingStyle.BLACK),
     (re.compile(r"/flashing_stdout.txt$"), ListingStyle.BLACK),
