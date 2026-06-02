@@ -14,13 +14,6 @@ from app.util_github import (
 )
 
 DIRECTORY_CACHE = pathlib.Path("/tmp/git_cache")
-DEFAULT_MPTEST_ARGUMENTS = " ".join(
-    [
-        "--xfail=xfail_master_478.json",
-        "--skip-fut=FUT_WLAN",
-        "--skip-fut=FUT_BLE",
-    ]
-)
 
 
 def fix_repos(form_startjob: FormStartJob) -> None:
@@ -55,9 +48,8 @@ def validate_pr(form_startjob: FormStartJob) -> ReturncodeStartJob:
     p = util_pr_check.PrCheck.factory(git_ref=git_ref)
 
     ports_comma_delimited = ",".join(p.json_pr_ports.ports)
-    form_startjob.arguments = (
-        f"{DEFAULT_MPTEST_ARGUMENTS} --only-tag='mcu={ports_comma_delimited}'"
-    )
+    form_startjob.arguments = f"--skip-fut=FUT_WLAN --skip-fut=FUT_BLE --only-tag='mcu={ports_comma_delimited}'"
+    form_startjob.arguments_report = "--xfail=xfail_master_478.json"
     form_startjob.repo_firmware = git_ref
     form_startjob.repo_tests = git_ref
     form_startjob.username = USER_HMAERKI

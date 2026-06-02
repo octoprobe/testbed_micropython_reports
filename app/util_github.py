@@ -104,6 +104,7 @@ class FormStartJob(BaseModel):
     action: str = ""
     username: str = USER_NOBODY
     arguments: str | None = ""
+    arguments_report: str | None = ""
     repo_tests: str | None = "https://github.com/micropython/micropython.git@master"
     repo_firmware: str | None = "https://github.com/micropython/micropython.git@master"
     pr_number: str = ""
@@ -161,6 +162,8 @@ def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
         f"pr_repo={form_startjob.pr_repo}",
         "--field",
         f"arguments={form_startjob.arguments}",
+        "--field",
+        f"arguments_report={form_startjob.arguments_report}",
         "--field",
         f"repo_firmware={form_startjob.repo_firmware}",
         "--field",
