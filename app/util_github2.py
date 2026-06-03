@@ -13,6 +13,10 @@ from markupsafe import Markup
 from octoprobe.util_cached_git_repo import GitMetadata, GitSpec
 from testbed_micropython.report_test import util_constants
 from testbed_micropython.report_test.util_baseclasses import ResultContext
+from testbed_micropython.report_test.util_constants import (
+    GITHUB_PREFIX,
+    GITHUB_WORKFLOW,
+)
 from testbed_micropython.report_test.util_push_testresults import (
     DirectoryManualWorkflow,
 )
@@ -23,8 +27,6 @@ from app.constants import (
     FILENAME_EXPIRY,
     FILENAME_GH_LIST_JSON,
     FILENAME_INPUTS_JSON,
-    GITHUB_PREFIX,
-    GITHUB_WORKFLOW,
 )
 from app.util_github import FormStartJob, gh_list2
 

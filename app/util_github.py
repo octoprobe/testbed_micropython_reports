@@ -4,8 +4,11 @@ import subprocess
 
 from pydantic import BaseModel
 from testbed_micropython.pr_check import util_github
-
-from app.constants import GITHUB_EVENT, GITHUB_REPO, GITHUB_WORKFLOW
+from testbed_micropython.report_test.util_constants import (
+    GITHUB_EVENT,
+    GITHUB_REPO,
+    GITHUB_WORKFLOW,
+)
 
 from . import util_github_mockdata
 

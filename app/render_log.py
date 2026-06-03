@@ -233,7 +233,7 @@ class Render:
     <a id="line{0}" name="line{0}"/>
     <a href="{path_directory}">back to directory</a><br/>
     path: {self.url.path}</br>
-    severity: {severity_links(self.severity, line_number=0)} {self.severity_text}<br>
+    severity: {severity_links(self.severity, line_number=0)} {self.severity_text}<br/>
     schema_color_active: {schema_color_active}
 </p>
 """)
