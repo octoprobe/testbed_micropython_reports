@@ -2,7 +2,7 @@ import html
 import io
 import pathlib
 
-from octoprobe.util_cached_git_repo import CachedGitRepo, GitSpec
+from git_cached_repo.git_cached_repo import CachedGitRepo, GitSpec
 from octoprobe.util_subprocess import SubprocessExitCodeException
 from testbed_micropython.pr_check import util_pr_check
 

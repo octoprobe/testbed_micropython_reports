@@ -9,8 +9,8 @@ import re
 import shutil
 import time
 
+from git_cached_repo.git_cached_repo import GitMetadata, GitSpec
 from markupsafe import Markup
-from octoprobe.util_cached_git_repo import GitMetadata, GitSpec
 from testbed_micropython.report_test import util_constants
 from testbed_micropython.report_test.util_baseclasses import ResultContext
 from testbed_micropython.report_test.util_constants import (
