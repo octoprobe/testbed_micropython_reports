@@ -18,6 +18,11 @@
 		"ruff.enable": true,
 		"ruff.fixAll": true,
 		"ruff.lint.enable": true,
+		"pylint.path": [
+			"~/.env/python",
+			"-m",
+			"pylint"
+		],
 		"mpremote.srcSubdirectory": "src",
 		"python.testing.pytestArgs": [
 			"-v",

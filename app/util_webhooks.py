@@ -8,12 +8,15 @@ Register via web:
   * Payload URL: https://reports.octoprobe.org/github-webhook
   * Content Type: application/json
   * Secret: <secret>
-  * SSL: Disable # github doesn't seem to recognice letsencrypt
-  * Which: Let me select individual events
+  * SSL: Disable # github doesn't seem to recognize letsencrypt
+  * Let me select individual events
     * Pull requests
   --> Add webhook
 """
 
+from __future__ import annotations
+
+import dataclasses
 import enum
 import hashlib
 import hmac
@@ -115,3 +118,43 @@ def handle_webhook(x_github_event: str, payload: dict[str, typing.Any]) -> None:
 
     # Trigger your application logic here
     # e.g. queue a job, run tests, notify a service, ...
+
+
+@dataclasses.dataclass(frozen=True, repr=True)
+class Webhook:
+    repo: str
+    pr_number: int
+    pr_url: str
+    pr_state: str
+    branch_name: str
+    author: str
+    commit: str
+
+    @staticmethod
+    def factory(dict_json: dict[str, typing.Any]) -> Webhook:
+        return Webhook(
+            repo=dict_json["repository"]["name"],
+            pr_number=dict_json["pull_request"]["number"],
+            pr_url=dict_json["pull_request"]["url"],
+            pr_state=dict_json["pull_request"]["state"],
+            branch_name=dict_json["pull_request"]["head"]["ref"],
+            author=dict_json["pull_request"]["head"]["user"]["login"],
+            commit=dict_json["pull_request"]["head"]["sha"],
+        )
+
+
+def get_list_hooks() -> list[Webhook]:
+    directory_todo = repo_directory_name(
+        repo="hmaerki/experiment_webhook_PR", enumdone=EnumDone.TODO
+    )
+    list_hooks: list[Webhook] = []
+    for filename_todo in directory_todo.glob("*.json"):
+        with filename_todo.open("r") as f:
+            dict_json = json.load(f)
+            try:
+                webhook = Webhook.factory(dict_json=dict_json)
+                list_hooks.append(webhook)
+            except KeyError:
+                pass
+
+    return list_hooks

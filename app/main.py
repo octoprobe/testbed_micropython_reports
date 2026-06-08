@@ -45,7 +45,7 @@ async def github_webhook(
     payload = await request.json()
 
     if x_github_event in ("ping", "pull_request"):
-        util_webhooks.handle_webhook(x_github_event=x_github_event,payload=payload)
+        util_webhooks.handle_webhook(x_github_event=x_github_event, payload=payload)
 
     return {"status": "ok"}
 
@@ -168,6 +168,18 @@ def jobs_start_POST(
         form_startjob=form_startjob,
         form_rc=form_rc,
         file_html="jobs.html",
+    )
+
+
+@app.get("/jobs/webhooks")
+def jobs_webhooks_GET(request: Request):
+    list_hooks = util_webhooks.get_list_hooks()
+    return JINJA2_TEMPLATES.TemplateResponse(
+        "webhooks.html",
+        {
+            "request": request,
+            "list_hooks": list_hooks,
+        },
     )
 
 

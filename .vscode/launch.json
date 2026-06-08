@@ -16,6 +16,7 @@
             "cwd": "${workspaceFolder}",
             "env": {
                 "DIRECTORY_REPORTS": "${workspaceFolder}/reports",
+                "WEBHOOK_SECRET": "1243",
             },
             "envFile": "${workspaceFolder}/.env",
             "justMyCode": false,

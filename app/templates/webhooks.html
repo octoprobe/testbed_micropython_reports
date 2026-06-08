@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block title %}
+Octoprobe - testbed_micropython
+{% endblock %}
+
+{% block content %}
+
+<h1>Webhooks</h1>
+
+
+
+<table>
+  <thead>
+    <tr>
+      <th>repo</th>
+      <th>#pr</th>
+      <th>branch</th>
+      <th>author</th>
+      <th>commit</th>
+    </tr>
+  </thead>
+  <tbody>
+    {%- for hook in list_hooks %}
+    <tr>
+      <td>
+        {{ hook.repo }}
+      </td>
+      <td>
+        <a href="{{ hook.pr_url }}">{{ hook.pr_number }}</a> ({{ hook.pr_state }})
+      </td>
+      <td>
+        {{ hook.branch_name }}
+      </td>
+      <td>
+        {{ hook.author }}
+      </td>
+      <td>
+        {{ hook.commit }}
+      </td>
+    </tr>
+    {%- endfor %}
+  </tbody>
+</table>
+
+{%- endblock %}
