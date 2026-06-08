@@ -5,23 +5,12 @@ import shutil
 import tarfile
 import typing
 
-from fastapi import FastAPI, File, Form, HTTPException, Request, UploadFile
+from fastapi import FastAPI, File, Form, HTTPException, Header, Request, UploadFile
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
-from app import util_logging, util_validate
-from app.util_github import (
-    FormStartJob,
-    ReturncodeStartJob,
-    gh_start_job,
-)
-from app.util_github2 import (
-    WorkflowExpiry,
-    gh_list,
-    list_reports,
-    save_as_workflow_input,
-)
+from app import util_github, util_github2, util_logging, util_validate, util_webhooks
 
 from .constants import DIRECTORY_REPORTS
 from .render_directory import render_directory_or_file
@@ -39,6 +28,28 @@ assert DIRECTORY_TEMPLATES.is_dir()
 JINJA2_TEMPLATES = Jinja2Templates(directory=DIRECTORY_TEMPLATES)
 
 
+@app.post("/github-webhook")
+async def github_webhook(
+    request: Request,
+    x_github_event: str = Header(None),
+    x_hub_signature_256: str = Header(None),
+):
+    logger.info("/github-webhook")
+
+    body = await request.body()
+
+    if not util_webhooks.verify_signature(body=body, signature=x_hub_signature_256):
+        logger.warning("/github-webhook: verify_signature() failed!")
+        raise HTTPException(status_code=401, detail="Invalid signature")
+
+    payload = await request.json()
+
+    if x_github_event in ("ping", "pull_request"):
+        util_webhooks.handle_webhook(x_github_event=x_github_event,payload=payload)
+
+    return {"status": "ok"}
+
+
 @app.get("/index")
 def read_root(request: Request):
     return JINJA2_TEMPLATES.TemplateResponse("index.html", {"request": request})
@@ -46,8 +57,8 @@ def read_root(request: Request):
 
 def _index_start(
     request: Request,
-    form_startjob: FormStartJob,
-    form_rc: ReturncodeStartJob,
+    form_startjob: util_github.FormStartJob,
+    form_rc: util_github.ReturncodeStartJob,
     file_html: str,
 ) -> HTMLResponse:
     return JINJA2_TEMPLATES.TemplateResponse(
@@ -62,12 +73,12 @@ def _index_start(
 
 @app.post("/jobs/start_pr")
 def jobs_start_pr_POST(
-    request: Request, form_startjob: typing.Annotated[FormStartJob, Form()]
+    request: Request, form_startjob: typing.Annotated[util_github.FormStartJob, Form()]
 ):
     # form_data = await request.form()
     # action = form_data.get("action", "start")
     # Need to examine which will be the next job number
-    assert isinstance(form_startjob, FormStartJob)
+    assert isinstance(form_startjob, util_github.FormStartJob)
 
     form_rc_pr = util_validate.validate_pr(form_startjob=form_startjob)
 
@@ -87,13 +98,13 @@ def jobs_start_pr_POST(
             file_html="jobs_pr.html",
         )
 
-    next_directory_metadata = gh_list()
+    next_directory_metadata = util_github2.gh_list()
     if next_directory_metadata is not None:
-        save_as_workflow_input(
+        util_github2.save_as_workflow_input(
             form_startjob=form_startjob,
             directory_metadata=next_directory_metadata,
         )
-    form_rc = gh_start_job(form_startjob=form_startjob)
+    form_rc = util_github.gh_start_job(form_startjob=form_startjob)
     return _index_start(
         request=request,
         form_startjob=form_startjob,
@@ -104,12 +115,12 @@ def jobs_start_pr_POST(
 
 @app.get("/jobs/start_pr")
 def jobs_start_pr_GET(request: Request):
-    form_startjob = FormStartJob()
+    form_startjob = util_github.FormStartJob()
     form_startjob.pr_number = "17782"
     return _index_start(
         request=request,
         form_startjob=form_startjob,
-        form_rc=ReturncodeStartJob(),
+        form_rc=util_github.ReturncodeStartJob(),
         file_html="jobs_pr.html",
     )
 
@@ -118,20 +129,20 @@ def jobs_start_pr_GET(request: Request):
 def jobs_start_GET(request: Request):
     return _index_start(
         request=request,
-        form_startjob=FormStartJob(),
-        form_rc=ReturncodeStartJob(),
+        form_startjob=util_github.FormStartJob(),
+        form_rc=util_github.ReturncodeStartJob(),
         file_html="jobs.html",
     )
 
 
 @app.post("/jobs/start")
 def jobs_start_POST(
-    request: Request, form_startjob: typing.Annotated[FormStartJob, Form()]
+    request: Request, form_startjob: typing.Annotated[util_github.FormStartJob, Form()]
 ):
     # form_data = await request.form()
     # action = form_data.get("action", "start")
     # Need to examine which will be the next job number
-    assert isinstance(form_startjob, FormStartJob)
+    assert isinstance(form_startjob, util_github.FormStartJob)
     if form_startjob.action == "validate":
         form_rc = util_validate.validate_repos(form_startjob=form_startjob)
         return _index_start(
@@ -141,13 +152,13 @@ def jobs_start_POST(
             file_html="jobs.html",
         )
 
-    next_directory_metadata = gh_list()
+    next_directory_metadata = util_github2.gh_list()
     if next_directory_metadata is not None:
-        save_as_workflow_input(
+        util_github2.save_as_workflow_input(
             form_startjob=form_startjob,
             directory_metadata=next_directory_metadata,
         )
-    form_rc = gh_start_job(form_startjob=form_startjob)
+    form_rc = util_github.gh_start_job(form_startjob=form_startjob)
     if form_rc.msg_error is not None:
         # It typically takes some time till the new job appears in the list
         # time.sleep(2.0)
@@ -220,7 +231,7 @@ def purge_expired_reports(request: Request):
         "purge_expired_reports.html",
         {
             "request": request,
-            "list_reports": list_reports,
+            "list_reports": util_github2.list_reports,
         },
     )
 
@@ -239,12 +250,12 @@ def reports(request: Request, read_github: bool = False):
         # Expiry dialog. Write back values
         tag = request.query_params["tag"]
         expiry = request.query_params["expiry"]
-        workflow_expiry = WorkflowExpiry(tag=tag, expiry=expiry)
+        workflow_expiry = util_github2.WorkflowExpiry(tag=tag, expiry=expiry)
         workflow_expiry.write(workflow_unique_id=workflow_unique_id)
 
     # if read_github:
     try:
-        gh_list()
+        util_github2.gh_list()
     except Exception as e:
         print(f"ERROR: {e}")
 
@@ -252,7 +263,7 @@ def reports(request: Request, read_github: bool = False):
         "reports.html",
         {
             "request": request,
-            "list_reports": list_reports,
+            "list_reports": util_github2.list_reports,
         },
     )
 
