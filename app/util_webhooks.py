@@ -145,7 +145,9 @@ class Webhook:
 
 def get_list_hooks() -> list[Webhook]:
     directory_todo = repo_directory_name(
-        repo="hmaerki/experiment_webhook_PR", enumdone=EnumDone.TODO
+        # repo="hmaerki/experiment_webhook_PR",
+        repo="micropython/micropython",
+        enumdone=EnumDone.TODO,
     )
     list_hooks: list[Webhook] = []
     for filename_todo in directory_todo.glob("*.json"):
