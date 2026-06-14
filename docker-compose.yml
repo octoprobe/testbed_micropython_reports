@@ -7,7 +7,7 @@ services:
     entrypoint: ["/bin/sh", "-c", "app/start_uvicorn.sh"]
     volumes:
       - ./.:/server
-      - /etc/letsencrypt:/etc/letsencrypt:ro
+      - /home/www/docker-maerki/letsencrypt/etc:/etc/letsencrypt:ro
     ports:
       - '${APP_HOST}:${APP_PORT}:443'
     user: '${UID}:${GID}'

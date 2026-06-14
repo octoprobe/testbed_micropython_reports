@@ -1,0 +1,15 @@
+[
+    {
+        "directory_self": {
+            "chmod": "www-data:www-data:rwxr-x---"
+        }
+    },
+    {
+        "files": {
+            "chmod": "www-data:www-data:"
+        },
+        "directories": {
+            "chmod": "www-data:www-data:rwxr-x---"
+        }
+    }
+]
