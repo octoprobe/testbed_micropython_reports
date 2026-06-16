@@ -6,9 +6,18 @@
     },
     {
         "files": {
+            "patterns": [
+                "!.venv/*",
+                "*"
+            ],
             "chmod": "www-data:www-data:"
         },
         "directories": {
+            "patterns": [
+                "!.venv/",
+                "!.venv/*/",
+                "*/"
+            ],
             "chmod": "www-data:www-data:rwxr-x---"
         }
     }
