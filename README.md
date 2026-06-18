@@ -90,5 +90,5 @@ sh -c 'gh run list --repo=octoprobe/testbed_micropython --workflow=selfhosted_te
 ## Download testresults
 
 ```bash
-ssh www-data@www.maerki.com tar zcf - -C /home/www/docker-octoprobe reports reports_metadata | tar xzf -
+ssh www-data@www.maerki.com tar zcf - -C /home/www/docker-octoprobe reports reports_metadata reports_webhook | tar xzf -
 ```

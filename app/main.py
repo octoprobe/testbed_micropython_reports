@@ -52,7 +52,11 @@ async def github_webhook(
 
 @app.get("/index")
 def read_root(request: Request):
-    return JINJA2_TEMPLATES.TemplateResponse("index.html", {"request": request})
+    return JINJA2_TEMPLATES.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"request": request},
+    )
 
 
 def _index_start(
@@ -62,8 +66,9 @@ def _index_start(
     file_html: str,
 ) -> HTMLResponse:
     return JINJA2_TEMPLATES.TemplateResponse(
-        file_html,
-        {
+        request=request,
+        name=file_html,
+        context={
             "request": request,
             "form_startjob": form_startjob,
             "form_rc": form_rc,
@@ -175,8 +180,9 @@ def jobs_start_POST(
 def jobs_webhooks_GET(request: Request):
     list_hooks = util_webhooks.get_list_hooks()
     return JINJA2_TEMPLATES.TemplateResponse(
-        "webhooks.html",
-        {
+        request=request,
+        name="webhooks.html",
+        context={
             "request": request,
             "list_hooks": list_hooks,
         },
@@ -240,8 +246,9 @@ async def upload_tar_file(
 @app.get("/purge")
 def purge_expired_reports(request: Request):
     return JINJA2_TEMPLATES.TemplateResponse(
-        "purge_expired_reports.html",
-        {
+        request=request,
+        name="purge_expired_reports.html",
+        context={
             "request": request,
             "list_reports": util_github2.list_reports,
         },
@@ -272,8 +279,9 @@ def reports(request: Request, read_github: bool = False):
         print(f"ERROR: {e}")
 
     return JINJA2_TEMPLATES.TemplateResponse(
-        "reports.html",
-        {
+        request=request,
+        name="reports.html",
+        context={
             "request": request,
             "list_reports": util_github2.list_reports,
         },

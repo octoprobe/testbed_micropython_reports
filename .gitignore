@@ -170,3 +170,5 @@ reports/**
 reports_metadata/**
 reports_webhook/**
 *_obsolete/**
+
+letsencrypt/**
