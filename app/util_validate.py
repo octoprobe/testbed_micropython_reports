@@ -48,7 +48,7 @@ def validate_pr(form_startjob: FormStartJob) -> ReturncodeStartJob:
     p = util_pr_check.PrCheck.factory(git_ref=git_ref)
 
     ports_comma_delimited = ",".join(p.json_pr_ports.ports)
-    form_startjob.arguments = f"--skip-fut=FUT_WLAN --skip-fut=FUT_BLE --only-tag='mcu={ports_comma_delimited}'"
+    form_startjob.arguments = f"--count=3 --skip-fut=FUT_WLAN --skip-fut=FUT_BLE --only-tag='mcu={ports_comma_delimited}'"
     form_startjob.arguments_report = "--xfail=xfail_master_478.json"
     form_startjob.repo_firmware = git_ref
     form_startjob.repo_tests = git_ref
