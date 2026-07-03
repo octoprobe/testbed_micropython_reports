@@ -177,8 +177,9 @@ def render_directory_or_file(
     from .main import JINJA2_TEMPLATES
 
     return JINJA2_TEMPLATES.TemplateResponse(
-        "browse.html",
-        {
+        request=request,
+        name="browse.html",
+        context={
             "request": request,
             "path_relative": str(directory.relative_to(DIRECTORY_REPORTS)),
             "html_files": html_files,
