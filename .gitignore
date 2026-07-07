@@ -172,3 +172,5 @@ reports_webhook/**
 *_obsolete/**
 
 letsencrypt/**
+celerybeat-schedule-*
+dump.rdb

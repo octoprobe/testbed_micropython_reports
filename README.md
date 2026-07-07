@@ -92,3 +92,14 @@ sh -c 'gh run list --repo=octoprobe/testbed_micropython --workflow=selfhosted_te
 ```bash
 ssh www-data@www.maerki.com tar zcf - -C /home/www/docker-octoprobe reports reports_metadata reports_webhook | tar xzf -
 ```
+
+## Celery
+
+In docker container:
+
+```bash
+$ python
+>>> from app.util_celery_tasks import *
+>>> recurring_job.delay()
+'recurring_job'
+```
