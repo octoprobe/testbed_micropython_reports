@@ -1,0 +1,11 @@
+[user]
+	name = Hans Maerki
+	email = buhtig.hans.maerki@ergoinfo.ch
+[core]
+	directory = *
+	editor = vi
+	autocrlf = false
+[credential]
+	helper = store
+[color]
+	ui = auto

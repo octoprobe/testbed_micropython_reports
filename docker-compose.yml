@@ -3,7 +3,7 @@ services:
   web:
     build: .
     image: octoprobe-testbed_micropython-fastapi:${IMAGE_VERSION}
-    entrypoint: ["/bin/sh", "-c", "app/start_uvicorn.sh"]
+    entrypoint: ["/bin/bash", "/server/app/support/start_uvicorn.sh"]
     volumes:
       - ./.:/server
       - ./letsencrypt/etc:/etc/letsencrypt:ro
