@@ -174,3 +174,4 @@ reports_webhook/**
 letsencrypt/**
 celerybeat-schedule-*
 dump.rdb
+tests/webhooks/sample_data/**

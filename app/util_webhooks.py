@@ -33,9 +33,6 @@ from app import constants
 logger = logging.getLogger(__file__)
 
 
-WEBHOOK_SECRET = os.environ["WEBHOOK_SECRET"]
-
-
 class EnumDone(enum.StrEnum):
     TODO = "todo"
     DONE = "done"
@@ -45,10 +42,12 @@ def verify_signature(body: bytes, signature: str) -> bool:
     assert isinstance(body, bytes)
     assert isinstance(signature, str)
 
+    webhook_secret = os.environ["WEBHOOK_SECRET"]
+
     expected = (
         "sha256="
         + hmac.new(
-            WEBHOOK_SECRET.encode("ascii"),
+            webhook_secret.encode("ascii"),
             body,
             hashlib.sha256,
         ).hexdigest()
@@ -120,8 +119,31 @@ def handle_webhook(x_github_event: str, payload: dict[str, typing.Any]) -> None:
     # e.g. queue a job, run tests, notify a service, ...
 
 
+class EnumPrAction(enum.StrEnum):
+    EDITED = "edited"
+    LABELED = "labeled"
+    OPENED = "opened"
+    CONVERTED_TO_DRAFT = "converted_to_draft"
+    REOPENED = "reopened"
+    REVIEW_REQUESTED = "review_requested"
+    CLOSED = "closed"
+    MILESTONED = "milestoned"
+    READY_FOR_REVIEW = "ready_for_review"
+    REVIEW_REQUEST_REMOVED = "review_request_removed"
+    SYNCHRONIZE = "synchronize"
+    UNASSIGEND = "unassigned"
+    ASSIGNED = "assigned"
+
+
+class EnumPrState(enum.StrEnum):
+    OPEN = "open"
+    CLOSED = "closed"
+
+
 @dataclasses.dataclass(frozen=True, repr=True)
 class Webhook:
+    filename: str
+    action: str
     repo: str
     pr_number: int
     pr_url: str
@@ -131,8 +153,10 @@ class Webhook:
     commit: str
 
     @staticmethod
-    def factory(dict_json: dict[str, typing.Any]) -> Webhook:
+    def factory(filename: pathlib.Path, dict_json: dict[str, typing.Any]) -> Webhook:
         return Webhook(
+            filename=filename.name,
+            action=dict_json["action"],
             repo=dict_json["repository"]["name"],
             pr_number=dict_json["pull_request"]["number"],
             pr_url=dict_json["pull_request"]["url"],
@@ -143,20 +167,52 @@ class Webhook:
         )
 
 
-def get_list_hooks() -> list[Webhook]:
+class Webhooks(list[Webhook]):
+    @property
+    def pr_numbers(self) -> list[int]:
+        pr_numbers: set[int] = set()
+        for w in self:
+            pr_numbers.add(w.pr_number)
+        return sorted(pr_numbers)
+
+    def purge(self) -> Webhooks:
+        to_purge = Webhooks()
+        for pr_number in self.pr_numbers:
+            to_purge.extend(self.purge_pr(pr_number=pr_number))
+        return to_purge
+
+    def purge_pr(self, pr_number: int) -> Webhooks:
+        files = [w for w in self if w.pr_number == pr_number]
+        files.sort(key=lambda f: f.filename, reverse=True)
+        for i, file in enumerate(files):
+            if file.action in EnumPrAction.SYNCHRONIZE.value:
+                # Purge all files OLDER that this one
+                return Webhooks(files[i + 1 :])
+        assert len(files) > 0
+        if files[0].pr_state != EnumPrState.OPEN.value:
+            # If the pr is not open anymore: Purge all!
+            return Webhooks(files)
+        return Webhooks()
+
+
+def get_list_hooks() -> Webhooks:
     directory_todo = repo_directory_name(
         # repo="hmaerki/experiment_webhook_PR",
         repo="micropython/micropython",
         enumdone=EnumDone.TODO,
     )
-    list_hooks: list[Webhook] = []
-    for filename_todo in directory_todo.glob("*.json"):
-        with filename_todo.open("r") as f:
+    return get_list_hooks2(directory=directory_todo)
+
+
+def get_list_hooks2(directory) -> Webhooks:
+    list_hooks = Webhooks()
+    for filename in directory.glob("*.json"):
+        with filename.open("r") as f:
             dict_json = json.load(f)
             try:
-                webhook = Webhook.factory(dict_json=dict_json)
+                webhook = Webhook.factory(filename=filename, dict_json=dict_json)
                 list_hooks.append(webhook)
-            except KeyError:
-                pass
+            except KeyError as e:
+                logger.warning(f"{filename}: Failed to read: {e}")
 
     return list_hooks

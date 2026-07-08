@@ -30,6 +30,21 @@
             "args": [],
             "cwd": "${workspaceFolder}",
             "jinja": true
+        },
+        {
+            "name": "pytest",
+            "type": "debugpy",
+            "request": "launch",
+            "purpose": [
+                "debug-test"
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+            "subProcess": true,
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder:testbed_micropython_reports}"
+            }
         }
     ]
 }

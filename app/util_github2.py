@@ -27,6 +27,7 @@ from app.constants import (
     FILENAME_EXPIRY,
     FILENAME_GH_LIST_JSON,
     FILENAME_INPUTS_JSON,
+    assert_directory_reports,
 )
 from app.util_github import FormStartJob, gh_list2
 
@@ -301,6 +302,8 @@ class WorkflowReport:
         workflow_input: WorkflowInput | None = None
         workflow_expiry = WorkflowExpiry.default()
         result_context: ResultContext | None = None
+
+        assert_directory_reports()
 
         gh_list_json = (
             DIRECTORY_REPORTS_METADATA / base_directory / FILENAME_GH_LIST_JSON

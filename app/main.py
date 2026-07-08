@@ -12,7 +12,7 @@ from fastapi.templating import Jinja2Templates
 
 from app import util_github, util_github2, util_logging, util_validate, util_webhooks
 
-from .constants import DIRECTORY_REPORTS
+from . import constants
 from .render_directory import render_directory_or_file
 from .render_log import SEVERITY_DEFAULT
 
@@ -26,6 +26,8 @@ DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
 DIRECTORY_TEMPLATES = DIRECTORY_OF_THIS_FILE / "templates"
 assert DIRECTORY_TEMPLATES.is_dir()
 JINJA2_TEMPLATES = Jinja2Templates(directory=DIRECTORY_TEMPLATES)
+
+constants.assert_directory_reports()
 
 
 @app.post("/github-webhook")
@@ -205,7 +207,7 @@ async def upload_tar_file(
     """
     max_file_size_bytes = 10_1024_1024  # 10 MB in bytes
 
-    final_dir = DIRECTORY_REPORTS / label
+    final_dir = constants.DIRECTORY_REPORTS / label
     filename_tgz = final_dir / f"{label}.tgz"
     try:
         # Download tarfile and keep in memory

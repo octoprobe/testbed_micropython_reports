@@ -1,14 +1,17 @@
 {
 	"folders": [
 		{
+            "name": "testbed_micropython_reports",
 			"path": "."
 		},
-		{
-			"path": "../testbed_micropython"
-		},
-		{
-			"path": "../octoprobe"
-		}
+        {
+            "name": "testbed_micropython",
+            "path": "../testbed_micropython"
+        },
+        {
+            "name": "octoprobe",
+            "path": "../octoprobe"
+        }
 	],
 	"settings": {
 		"[python]": {
@@ -29,7 +32,7 @@
 			"-s",
 			"tests"
 		],
-		"python.testing.cwd": "${workspaceFolder}",
+        "python.testing.cwd": "${workspaceFolder:testbed_micropython_reports}",
 		"python.testing.unittestEnabled": false,
 		"python.testing.pytestEnabled": true
 	},
