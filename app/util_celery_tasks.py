@@ -13,6 +13,9 @@ app = Celery(
     backend=os.getenv("CELERY_RESULT_BACKEND", "redis://127.0.0.1:6379/1"),
 )
 
+# Keep startup broker retries explicit for Celery 6+ compatibility.
+app.conf.broker_connection_retry_on_startup = "true"
+
 app.conf.beat_schedule = {
     "recurring_job": {
         "task": "app.util_celery_tasks.recurring_job",
@@ -36,7 +39,7 @@ def run_recurring_job() -> None:
         return
 
     if gh_list.in_progress:
-        logger.info("Octorobe test in progress...")
+        logger.info("Octoprobe test in progress...")
         return
 
     for repo in util_webhooks.REPOS:

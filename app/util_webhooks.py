@@ -30,7 +30,7 @@ from testbed_micropython.report_test import util_testreport
 
 from app import constants
 
-from . import util_github, util_github2
+from . import util_github, util_github2, util_validate
 
 logger = logging.getLogger(__file__)
 
@@ -142,14 +142,24 @@ class EnumPrState(enum.StrEnum):
     CLOSED = "closed"
 
 
-def run_job3(repo: str, webhook_job: Webhook) -> None:
+def run_job3(repo: str, webhook_job: Webhook) -> bool:
+    """
+    return True if a Octoprobe action has been started
+    """
     logger.info(f"run_job3(repo={repo}, pr_number={webhook_job.pr_number})")
     form_startjob = util_github.FormStartJob(
         pr_number=str(webhook_job.pr_number),
         pr_repo=repo,
     )
+    form_rc_pr = util_validate.validate_pr(form_startjob=form_startjob)
+    if len(form_rc_pr.micropython_ports) == 0:
+        logger.info(
+            f"{repo=}: {webhook_job.filename}: Skipped as no micropython_ports to be tested!"
+        )
+        return False
 
     util_github2.run_job2(form_startjob=form_startjob)
+    return True
 
 
 @dataclasses.dataclass(frozen=True, repr=True)
@@ -177,6 +187,9 @@ class Webhook:
             author=dict_json["pull_request"]["head"]["user"]["login"],
             commit=dict_json["pull_request"]["head"]["sha"],
         )
+
+    def purge_to_directory_by_repo(self, repo: str) -> None:
+        Webhooks([self]).purge_to_directory_by_repo(repo=repo)
 
 
 class Webhooks(list[Webhook]):
@@ -242,20 +255,23 @@ class Webhooks(list[Webhook]):
             logger.debug(f"{directory_todo} -> {directory_done}: Purge {w.filename}")
             filename_todo.rename(filename_done)
 
+    def purge_to_directory_by_repo(self, repo: str) -> None:
+        directory_todo = repo_directory_name(repo=repo, enumdone=EnumDone.TODO)
+        directory_done = repo_directory_name(repo=repo, enumdone=EnumDone.DONE)
+        self.purge_to_directory(
+            directory_todo=directory_todo,
+            directory_done=directory_done,
+        )
+
     @classmethod
     def purge_by_repo(cls, repo: str) -> None:
         """
         Purge files from folder 'todo' to 'done'.
         """
-        directory_todo = repo_directory_name(repo=repo, enumdone=EnumDone.TODO)
-        directory_done = repo_directory_name(repo=repo, enumdone=EnumDone.DONE)
-        hooks = Webhooks.from_directory(directory=directory_todo)
+        hooks = Webhooks.from_directory_by_repo(repo=repo)
         hooks_to_purge = hooks.purge()
         logger.info(f"hooks_to_purge={len(hooks_to_purge)}")
-        hooks_to_purge.purge_to_directory(
-            directory_todo=directory_todo,
-            directory_done=directory_done,
-        )
+        hooks_to_purge.purge_to_directory_by_repo(repo=repo)
 
     @classmethod
     def recurring_job(cls, repo: str) -> bool:
@@ -266,8 +282,10 @@ class Webhooks(list[Webhook]):
         hooks = cls.from_directory_by_repo(repo=repo)
         webhook_job = hooks.next_job
         if webhook_job is not None:
-            run_job3(repo=repo, webhook_job=webhook_job)
-            return True
+            webhook_job.purge_to_directory_by_repo(repo=repo)
+            started = run_job3(repo=repo, webhook_job=webhook_job)
+            if started:
+                return True
 
         return False
 

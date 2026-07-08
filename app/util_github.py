@@ -2,7 +2,7 @@ import json
 import os
 import subprocess
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from testbed_micropython.pr_check import util_github, util_pr_check
 from testbed_micropython.report_test.util_constants import (
     GITHUB_EVENT,
@@ -138,6 +138,7 @@ class ReturncodeStartJob(BaseModel):
     msg_error: str | None = None
     stdout: str | None = None
     stderr: str | None = None
+    micropython_ports: list[str] = Field(default_factory=list)
 
     @property
     def button_start_disabled(self) -> str:

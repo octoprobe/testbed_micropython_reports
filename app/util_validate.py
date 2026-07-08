@@ -49,7 +49,11 @@ def validate_pr(form_startjob: FormStartJob) -> ReturncodeStartJob:
 
     stdout = io.StringIO()
     stdout.write("<br/>\n".join(pr_check.lines))
-    form_rc = ReturncodeStartJob(msg_ok="Ok", stdout=stdout.getvalue())
+    form_rc = ReturncodeStartJob(
+        msg_ok="Ok",
+        stdout=stdout.getvalue(),
+        micropython_ports=pr_check.micropython_ports,
+    )
     return form_rc
 
 
