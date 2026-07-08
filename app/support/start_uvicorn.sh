@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-redis-server &
+redis-server /server/app/support/redis.conf &
 redis_pid=$!
 
 # Wait until Redis accepts connections before starting Celery.
