@@ -9,7 +9,6 @@ from testbed_micropython.pr_check import util_pr_check
 from app.util_github import (
     FormStartJob,
     ReturncodeStartJob,
-    USER_HMAERKI,
     USER_NOBODY,
 )
 
@@ -44,19 +43,12 @@ def validate_pr(form_startjob: FormStartJob) -> ReturncodeStartJob:
         return form_rc
 
     git_ref = f"https://github.com/micropython/micropython.git~{pr_number}"
+    pr_check = util_pr_check.PrCheck.factory(git_ref=git_ref)
 
-    p = util_pr_check.PrCheck.factory(git_ref=git_ref)
-
-    ports_comma_delimited = ",".join(p.json_pr_ports.ports)
-    form_startjob.arguments = f"--count=3 --skip-fut=FUT_WLAN --skip-fut=FUT_BLE --only-tag='mcu={ports_comma_delimited}'"
-    form_startjob.arguments_report = "--xfail=xfail_master_478.json"
-    form_startjob.repo_firmware = git_ref
-    form_startjob.repo_tests = git_ref
-    form_startjob.username = USER_HMAERKI
-    form_startjob.pr_repo = p.json_pr_ports.pr_repo
+    form_startjob.set_defaults(git_ref=git_ref, pr_check=pr_check)
 
     stdout = io.StringIO()
-    stdout.write("<br/>\n".join(p.lines))
+    stdout.write("<br/>\n".join(pr_check.lines))
     form_rc = ReturncodeStartJob(msg_ok="Ok", stdout=stdout.getvalue())
     return form_rc
 

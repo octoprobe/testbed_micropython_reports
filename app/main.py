@@ -47,7 +47,7 @@ async def github_webhook(
     payload = await request.json()
 
     if x_github_event in ("ping", "pull_request"):
-        util_webhooks.handle_webhook(x_github_event=x_github_event, payload=payload)
+        util_webhooks.save_webhook(x_github_event=x_github_event, payload=payload)
 
     return {"status": "ok"}
 
@@ -105,13 +105,8 @@ def jobs_start_pr_POST(
             file_html="jobs_pr.html",
         )
 
-    next_directory_metadata = util_github2.gh_list()
-    if next_directory_metadata is not None:
-        util_github2.save_as_workflow_input(
-            form_startjob=form_startjob,
-            directory_metadata=next_directory_metadata,
-        )
-    form_rc = util_github.gh_start_job(form_startjob=form_startjob)
+    form_rc = util_github2.run_job2(form_startjob=form_startjob)
+
     return _index_start(
         request=request,
         form_startjob=form_startjob,
@@ -159,11 +154,11 @@ def jobs_start_POST(
             file_html="jobs.html",
         )
 
-    next_directory_metadata = util_github2.gh_list()
-    if next_directory_metadata is not None:
+    gh_list = util_github2.get_gh_list()
+    if gh_list.next_directory_metadata is not None:
         util_github2.save_as_workflow_input(
             form_startjob=form_startjob,
-            directory_metadata=next_directory_metadata,
+            directory_metadata=gh_list.next_directory_metadata,
         )
     form_rc = util_github.gh_start_job(form_startjob=form_startjob)
     if form_rc.msg_error is not None:
@@ -180,13 +175,13 @@ def jobs_start_POST(
 
 @app.get("/jobs/webhooks")
 def jobs_webhooks_GET(request: Request):
-    list_hooks = util_webhooks.get_list_hooks()
+
     return JINJA2_TEMPLATES.TemplateResponse(
         request=request,
         name="webhooks.html",
         context={
             "request": request,
-            "list_hooks": list_hooks,
+            "list_repos": util_webhooks.REPOS,
         },
     )
 
@@ -274,11 +269,11 @@ def reports(request: Request, read_github: bool = False):
         workflow_expiry = util_github2.WorkflowExpiry(tag=tag, expiry=expiry)
         workflow_expiry.write(workflow_unique_id=workflow_unique_id)
 
-    # if read_github:
-    try:
-        util_github2.gh_list()
-    except Exception as e:
-        print(f"ERROR: {e}")
+    if read_github:
+        try:
+            util_github2.get_gh_list()
+        except Exception as e:
+            print(f"ERROR: {e}")
 
     return JINJA2_TEMPLATES.TemplateResponse(
         request=request,

@@ -30,7 +30,29 @@ from testbed_micropython.report_test import util_testreport
 
 from app import constants
 
+from . import util_github, util_github2
+
 logger = logging.getLogger(__file__)
+
+REPO_MICROPYTHON = "micropython/micropython"
+REPO_EXPERIMENT = "hmaerki/experiment_webhook_PR"
+
+ACTIVATE_FOR_AUTHORS = (
+    "agatti",
+    "andrewleech",
+    "dpgeorge",
+    "hmaerki",
+    "jonnor",
+    "josverl",
+    "mattytrentini",
+    "micropython",
+    "octoprobe-bot",
+    "pimoroni",
+    "projectgus",
+    "ricksorensen",
+    "robert-hh",
+)
+assert any(a.islower() for a in ACTIVATE_FOR_AUTHORS)
 
 
 class EnumDone(enum.StrEnum):
@@ -62,25 +84,12 @@ def repo_directory_name(repo: str, enumdone: EnumDone) -> pathlib.Path:
         f"'{repo}' should be something like 'micropython/micropython'!"
     )
     repo_text = repo.replace("/", "-")
-    return constants.DIRECTORY_REPORTS_WEBHOOK / repo_text / enumdone.value
+    repo_directory = constants.DIRECTORY_REPORTS_WEBHOOK / repo_text / enumdone.value
+    repo_directory.mkdir(parents=True, exist_ok=True)
+    return repo_directory
 
 
-def move_files_to_done(repo: str, pr_number: int) -> None:
-    """
-    Move all files related to 'repo_text' and 'pr_number' into the 'done' folder.
-    """
-    directory_todo = repo_directory_name(repo=repo, enumdone=EnumDone.TODO)
-    directory_done = repo_directory_name(repo=repo, enumdone=EnumDone.DONE)
-    directory_done.mkdir(parents=True, exist_ok=True)
-    pattern = f"*-{pr_number:06d}.json"
-    logger.debug(f"Pattern: {pattern}")
-    for filename_todo in directory_todo.glob(pattern):
-        filename_done = directory_done / filename_todo.name
-        logger.debug(f"{filename_todo} -> {filename_done}")
-        filename_todo.rename(filename_done)
-
-
-def handle_webhook(x_github_event: str, payload: dict[str, typing.Any]) -> None:
+def save_webhook(x_github_event: str, payload: dict[str, typing.Any]) -> None:
     assert isinstance(x_github_event, str)
     assert isinstance(payload, dict)
 
@@ -93,8 +102,6 @@ def handle_webhook(x_github_event: str, payload: dict[str, typing.Any]) -> None:
     except KeyError:
         pass
 
-    move_files_to_done(repo=repo, pr_number=pr_number)
-
     now_text = util_testreport.now_formatted()
     filename = "-".join(
         [
@@ -104,7 +111,8 @@ def handle_webhook(x_github_event: str, payload: dict[str, typing.Any]) -> None:
             f"{pr_number:06d}.json",
         ]
     )
-    filename_json = repo_directory_name(repo=repo, enumdone=EnumDone.TODO) / filename
+    repo_directory = repo_directory_name(repo=repo, enumdone=EnumDone.TODO)
+    filename_json = repo_directory / filename
     filename_json.parent.mkdir(parents=True, exist_ok=True)
     logger.info(
         f"webhook: repo:{repo}, event:{x_github_event}, action:{action}, #{pr_number}, filename:{filename_json}"
@@ -112,14 +120,8 @@ def handle_webhook(x_github_event: str, payload: dict[str, typing.Any]) -> None:
     with filename_json.open("w") as f:
         json.dump(obj=payload, fp=f, indent=4)
 
-    # if action != "synchronize":
-    #     return
 
-    # Trigger your application logic here
-    # e.g. queue a job, run tests, notify a service, ...
-
-
-class EnumPrAction(enum.StrEnum):
+class EnumAction(enum.StrEnum):
     EDITED = "edited"
     LABELED = "labeled"
     OPENED = "opened"
@@ -138,6 +140,16 @@ class EnumPrAction(enum.StrEnum):
 class EnumPrState(enum.StrEnum):
     OPEN = "open"
     CLOSED = "closed"
+
+
+def run_job3(repo: str, webhook_job: Webhook) -> None:
+    logger.info(f"run_job3(repo={repo}, pr_number={webhook_job.pr_number})")
+    form_startjob = util_github.FormStartJob(
+        pr_number=str(webhook_job.pr_number),
+        pr_repo=repo,
+    )
+
+    util_github2.run_job2(form_startjob=form_startjob)
 
 
 @dataclasses.dataclass(frozen=True, repr=True)
@@ -169,6 +181,31 @@ class Webhook:
 
 class Webhooks(list[Webhook]):
     @property
+    def next_job(self) -> Webhook | None:
+        """
+        From all hook:
+         * filter 'synchronized'.
+         * filter by ACTIVATE_FOR_AUTHORS
+        Return the newest hook.
+        """
+        hooks_synchronized: dict[int, Webhook] = {}
+        for hook in sorted(self, key=lambda f: f.filename):
+            if hook.action != EnumAction.SYNCHRONIZE.value:
+                continue
+            if hook.author.lower() not in ACTIVATE_FOR_AUTHORS:
+                continue
+            hooks_synchronized[hook.pr_number] = hook
+
+        hooks = sorted(
+            hooks_synchronized.values(),
+            key=lambda h: h.filename,
+            reverse=True,
+        )
+        if len(hooks) == 0:
+            return None
+        return hooks[0]
+
+    @property
     def pr_numbers(self) -> list[int]:
         pr_numbers: set[int] = set()
         for w in self:
@@ -185,7 +222,7 @@ class Webhooks(list[Webhook]):
         files = [w for w in self if w.pr_number == pr_number]
         files.sort(key=lambda f: f.filename, reverse=True)
         for i, file in enumerate(files):
-            if file.action in EnumPrAction.SYNCHRONIZE.value:
+            if file.action in EnumAction.SYNCHRONIZE.value:
                 # Purge all files OLDER that this one
                 return Webhooks(files[i + 1 :])
         assert len(files) > 0
@@ -194,25 +231,73 @@ class Webhooks(list[Webhook]):
             return Webhooks(files)
         return Webhooks()
 
+    def purge_to_directory(
+        self,
+        directory_todo: pathlib.Path,
+        directory_done: pathlib.Path,
+    ) -> None:
+        for w in self:
+            filename_todo = directory_todo / w.filename
+            filename_done = directory_done / w.filename
+            logger.debug(f"{directory_todo} -> {directory_done}: Purge {w.filename}")
+            filename_todo.rename(filename_done)
 
-def get_list_hooks() -> Webhooks:
-    directory_todo = repo_directory_name(
-        # repo="hmaerki/experiment_webhook_PR",
-        repo="micropython/micropython",
-        enumdone=EnumDone.TODO,
-    )
-    return get_list_hooks2(directory=directory_todo)
+    @classmethod
+    def purge_by_repo(cls, repo: str) -> None:
+        """
+        Purge files from folder 'todo' to 'done'.
+        """
+        directory_todo = repo_directory_name(repo=repo, enumdone=EnumDone.TODO)
+        directory_done = repo_directory_name(repo=repo, enumdone=EnumDone.DONE)
+        hooks = Webhooks.from_directory(directory=directory_todo)
+        hooks_to_purge = hooks.purge()
+        logger.info(f"hooks_to_purge={len(hooks_to_purge)}")
+        hooks_to_purge.purge_to_directory(
+            directory_todo=directory_todo,
+            directory_done=directory_done,
+        )
+
+    @classmethod
+    def recurring_job(cls, repo: str) -> bool:
+        """
+        return True if a Octoprobe action has been started
+        """
+        cls.purge_by_repo(repo=repo)
+        hooks = cls.from_directory_by_repo(repo=repo)
+        webhook_job = hooks.next_job
+        if webhook_job is not None:
+            run_job3(repo=repo, webhook_job=webhook_job)
+            return True
+
+        return False
+
+    @classmethod
+    def from_directory_by_repo(cls, repo: str) -> Webhooks:
+        directory_todo = repo_directory_name(repo=repo, enumdone=EnumDone.TODO)
+        return cls.from_directory(directory=directory_todo)
+
+    @classmethod
+    def from_directory(cls, directory: pathlib.Path) -> Webhooks:
+        hooks = Webhooks()
+        for filename in directory.glob("*.json"):
+            with filename.open("r") as f:
+                dict_json = json.load(f)
+                try:
+                    webhook = Webhook.factory(filename=filename, dict_json=dict_json)
+                    hooks.append(webhook)
+                except KeyError as e:
+                    logger.warning(f"{filename}: Failed to read: {e}")
+
+        return hooks
 
 
-def get_list_hooks2(directory) -> Webhooks:
-    list_hooks = Webhooks()
-    for filename in directory.glob("*.json"):
-        with filename.open("r") as f:
-            dict_json = json.load(f)
-            try:
-                webhook = Webhook.factory(filename=filename, dict_json=dict_json)
-                list_hooks.append(webhook)
-            except KeyError as e:
-                logger.warning(f"{filename}: Failed to read: {e}")
+@dataclasses.dataclass(frozen=True)
+class Repo:
+    repo: str
 
-    return list_hooks
+    @property
+    def hooks(self) -> Webhooks:
+        return Webhooks.from_directory_by_repo(repo=self.repo)
+
+
+REPOS = [Repo(r) for r in (REPO_MICROPYTHON, REPO_EXPERIMENT)]

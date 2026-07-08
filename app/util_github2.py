@@ -13,10 +13,6 @@ from git_cached_repo.git_cached_repo import GitMetadata, GitSpec
 from markupsafe import Markup
 from testbed_micropython.report_test import util_constants
 from testbed_micropython.report_test.util_baseclasses import ResultContext
-from testbed_micropython.report_test.util_constants import (
-    GITHUB_PREFIX,
-    GITHUB_WORKFLOW,
-)
 from testbed_micropython.report_test.util_push_testresults import (
     DirectoryManualWorkflow,
 )
@@ -29,7 +25,8 @@ from app.constants import (
     FILENAME_INPUTS_JSON,
     assert_directory_reports,
 )
-from app.util_github import FormStartJob, gh_list2
+
+from . import util_github
 
 logger = logging.getLogger(__file__)
 
@@ -67,7 +64,7 @@ class WorkflowInput:
 
 
 def save_as_workflow_input(
-    form_startjob: FormStartJob,
+    form_startjob: util_github.FormStartJob,
     directory_metadata: pathlib.Path,
 ) -> None:
     def space(text: str | None) -> str:
@@ -83,6 +80,20 @@ def save_as_workflow_input(
     filename = directory_metadata / FILENAME_INPUTS_JSON
     filename.parent.mkdir(parents=True, exist_ok=True)
     filename.write_text(json_text)
+
+
+def run_job2(form_startjob: util_github.FormStartJob) -> util_github.ReturncodeStartJob:
+    gh_list = get_gh_list()
+    if gh_list.next_directory_metadata is not None:
+        logger.info(
+            f"run_job2(next_directory_metadata={gh_list.next_directory_metadata})"
+        )
+        save_as_workflow_input(
+            form_startjob=form_startjob,
+            directory_metadata=gh_list.next_directory_metadata,
+        )
+    form_rc = util_github.gh_start_job(form_startjob=form_startjob)
+    return form_rc
 
 
 @dataclasses.dataclass(slots=True)
@@ -141,11 +152,11 @@ class WorkflowJob:
     @property
     def base_directory(self) -> str:
         return self.static_base_directory(name=self.name, number=self.number)
-        return f"{GITHUB_PREFIX}{self.name}_{self.number}"
+        return f"{util_constants.GITHUB_PREFIX}{self.name}_{self.number}"
 
     @classmethod
     def static_base_directory(cls, name: str, number: int) -> str:
-        return f"{GITHUB_PREFIX}{name}_{number}"
+        return f"{util_constants.GITHUB_PREFIX}{name}_{number}"
 
     @property
     def directory_metadata(self) -> pathlib.Path:
@@ -245,7 +256,7 @@ class BaseDirectory:
         assert isinstance(base_directory, str)
         self.base_directory = base_directory
 
-        self.is_github_workflow = GITHUB_WORKFLOW in self.base_directory
+        self.is_github_workflow = util_constants.GITHUB_WORKFLOW in self.base_directory
         """
         True if: github_selfhosted_testrun_420
         False if: local_hostname_20250116-185542
@@ -506,25 +517,40 @@ class WorkflowReport:
         return self.input.arguments
 
 
-def gh_list() -> pathlib.Path | None:
+@dataclasses.dataclass(slots=True, frozen=True)
+class GhList:
+    in_progress: bool
+    next_directory_metadata: pathlib.Path | None
+
+
+def get_gh_list() -> GhList:
     """
     Saves the state of each job in 'directory_metadata / FILENAME_GH_LIST_JSON'.
     Returns directory_metadata for the next job beeing started.
     """
+    assert_directory_reports()
+
+    jobs = util_github.get_gh_jobs()
     next_directory_metadata: pathlib.Path | None = None
-    jobs = gh_list2()
+    in_progress = False
     for json_job in jobs:
         workflow_job = WorkflowJob(**json_job)  # type: ignore[arg-type]
         if next_directory_metadata is None:
             next_directory_metadata = WorkflowJob.static_directory_metadata(
-                name=workflow_job.name, number=workflow_job.number + 1
+                name=workflow_job.name,
+                number=workflow_job.number + 1,
             )
+        if workflow_job.status in ("in_progress", "queued"):
+            in_progress = True
         json_text = json.dumps(json_job, indent=4, sort_keys=True)
         filename = workflow_job.directory_metadata / FILENAME_GH_LIST_JSON
         filename.parent.mkdir(parents=True, exist_ok=True)
         filename.write_text(json_text)
 
-    return next_directory_metadata
+    return GhList(
+        in_progress=in_progress,
+        next_directory_metadata=next_directory_metadata,
+    )
 
 
 def list_reports(including_expired=False) -> list:

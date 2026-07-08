@@ -59,7 +59,9 @@ _TESTPARAMS = (
     "testparam", _TESTPARAMS, ids=lambda testparam: testparam.pytest_id
 )
 def test_purge_pr(testparam: Ttestparam) -> None:
-    files = util_webhooks.get_list_hooks2(DIRECTORY_OF_THIS_FILE / testparam.directory)
-    files_to_purge = files.purge()
-    filenames_to_purge = [f.filename for f in files_to_purge]
+    hooks = util_webhooks.Webhooks.from_directory(
+        DIRECTORY_OF_THIS_FILE / testparam.directory
+    )
+    hooks_to_purge = hooks.purge()
+    filenames_to_purge = [f.filename for f in hooks_to_purge]
     assert testparam.expected_filenames_to_purge == filenames_to_purge

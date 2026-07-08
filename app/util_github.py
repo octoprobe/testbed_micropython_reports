@@ -3,7 +3,7 @@ import os
 import subprocess
 
 from pydantic import BaseModel
-from testbed_micropython.pr_check import util_github
+from testbed_micropython.pr_check import util_github, util_pr_check
 from testbed_micropython.report_test.util_constants import (
     GITHUB_EVENT,
     GITHUB_REPO,
@@ -52,7 +52,7 @@ def gh_jobs_obsolete() -> list[dict[str, str | int]]:
     return list_result
 
 
-def gh_list2() -> list[dict[str, str | int]]:
+def get_gh_jobs() -> list[dict[str, str | int]]:
     # TODO: Add mocked results
     if MOCKED_GITHUB_RESULTS:
         # TODO
@@ -112,6 +112,15 @@ class FormStartJob(BaseModel):
     repo_firmware: str | None = "https://github.com/micropython/micropython.git@master"
     pr_number: str = ""
     pr_repo: str = ""
+
+    def set_defaults(self, git_ref: str, pr_check: util_pr_check.PrCheck) -> None:
+        ports_comma_delimited = ",".join(pr_check.json_pr_ports.ports)
+        self.arguments = f"--count=3 --skip-fut=FUT_WLAN --skip-fut=FUT_BLE --only-tag='mcu={ports_comma_delimited}'"
+        self.arguments_report = "--xfail=xfail_master_478.json"
+        self.username = USER_HMAERKI
+        self.repo_firmware = git_ref
+        self.repo_tests = git_ref
+        self.pr_repo = pr_check.json_pr_ports.pr_repo
 
     @staticmethod
     def arguments_prefilled() -> list[str]:

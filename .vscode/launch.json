@@ -32,6 +32,18 @@
             "jinja": true
         },
         {
+            "name": "recurring_job.py",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "app.util_celery_tasks",
+            "args": [],
+            "cwd": "${workspaceFolder}",
+            "env": {
+                "DIRECTORY_REPORTS": "${workspaceFolder}/reports/"
+            },
+            "jinja": true
+        },
+        {
             "name": "pytest",
             "type": "debugpy",
             "request": "launch",

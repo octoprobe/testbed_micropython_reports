@@ -8,39 +8,48 @@ Octoprobe - testbed_micropython
 
 <h1>Webhooks</h1>
 
+{%- for repo in list_repos %}
 
+<h2>Repo <code>{{ repo.repo }}</code></h2>
 
-<table>
-  <thead>
-    <tr>
-      <th>repo</th>
-      <th>#pr</th>
-      <th>branch</th>
-      <th>author</th>
-      <th>commit</th>
-    </tr>
-  </thead>
-  <tbody>
-    {%- for hook in list_hooks %}
-    <tr>
-      <td>
-        {{ hook.repo }}
-      </td>
-      <td>
-        <a href="{{ hook.pr_url }}">{{ hook.pr_number }}</a> ({{ hook.pr_state }})
-      </td>
-      <td>
-        {{ hook.branch_name }}
-      </td>
-      <td>
-        {{ hook.author }}
-      </td>
-      <td>
-        {{ hook.commit }}
-      </td>
-    </tr>
-    {%- endfor %}
-  </tbody>
-</table>
+<details>
+  <summary>Expand table</summary>
+
+  <table>
+    <thead>
+      <tr>
+        <th>repo</th>
+        <th>#pr</th>
+        <th>branch</th>
+        <th>author</th>
+        <th>commit</th>
+      </tr>
+    </thead>
+    <tbody>
+      {%- for hook in repo.hooks %}
+      <tr>
+        <td>
+          {{ hook.repo }}
+        </td>
+        <td>
+          <a href="{{ hook.pr_url }}">{{ hook.pr_number }}</a> ({{ hook.pr_state }})
+        </td>
+        <td>
+          {{ hook.branch_name }}
+        </td>
+        <td>
+          {{ hook.author }}
+        </td>
+        <td>
+          {{ hook.commit }}
+        </td>
+      </tr>
+      {%- endfor %}
+    </tbody>
+  </table>
+
+</details>
+
+{%- endfor %}
 
 {%- endblock %}
