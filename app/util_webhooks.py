@@ -42,15 +42,15 @@ ACTIVATE_FOR_AUTHORS = (
     "andrewleech",
     "dpgeorge",
     "hmaerki",
-    "jonnor",
-    "josverl",
-    "mattytrentini",
+    # "jonnor",
+    # "josverl",
+    # "mattytrentini",
     "micropython",
     "octoprobe-bot",
-    "pimoroni",
+    # "pimoroni",
     "projectgus",
-    "ricksorensen",
-    "robert-hh",
+    # "ricksorensen",
+    # "robert-hh",
 )
 assert any(a.islower() for a in ACTIVATE_FOR_AUTHORS)
 
