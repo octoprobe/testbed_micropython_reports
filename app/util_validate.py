@@ -45,7 +45,8 @@ def validate_pr(form_startjob: FormStartJob) -> ReturncodeStartJob:
     git_ref = f"https://github.com/micropython/micropython.git~{pr_number}"
     pr_check = util_pr_check.PrCheck.factory(git_ref=git_ref)
 
-    form_startjob.set_defaults(git_ref=git_ref, pr_check=pr_check)
+    job_title = f"PR{form_startjob.pr_number} - {pr_check.json_pr_ports.author} - {pr_check.json_pr_ports.title} - {' '.join(pr_check.micropython_ports)}"
+    form_startjob.set_defaults(git_ref=git_ref, pr_check=pr_check, job_title=job_title)
 
     stdout = io.StringIO()
     stdout.write("<br/>\n".join(pr_check.lines))

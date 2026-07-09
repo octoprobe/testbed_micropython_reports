@@ -260,6 +260,8 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 def reports(request: Request, read_github: bool = False):
     """
     This top route '/' overrides the following '/{path:path}'!
+
+    read_github: http://localhost:8000/?read_github=1
     """
     workflow_unique_id = request.query_params.get("workflow_unique_id", None)
     if workflow_unique_id is not None:

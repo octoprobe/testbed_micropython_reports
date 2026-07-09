@@ -112,8 +112,11 @@ class FormStartJob(BaseModel):
     repo_firmware: str | None = "https://github.com/micropython/micropython.git@master"
     pr_number: str = ""
     pr_repo: str = ""
+    job_title: str = ""
 
-    def set_defaults(self, git_ref: str, pr_check: util_pr_check.PrCheck) -> None:
+    def set_defaults(
+        self, git_ref: str, pr_check: util_pr_check.PrCheck, job_title: str
+    ) -> None:
         ports_comma_delimited = ",".join(pr_check.json_pr_ports.ports)
         self.arguments = f"--count=3 --skip-fut=FUT_WLAN --skip-fut=FUT_BLE --only-tag='mcu={ports_comma_delimited}'"
         self.arguments_report = "--xfail=xfail_master_478.json"
@@ -121,6 +124,7 @@ class FormStartJob(BaseModel):
         self.repo_firmware = git_ref
         self.repo_tests = git_ref
         self.pr_repo = pr_check.json_pr_ports.pr_repo
+        self.job_title = job_title
 
     @staticmethod
     def arguments_prefilled() -> list[str]:
@@ -170,6 +174,8 @@ def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
         "selfhosted_testrun.yml",
         "--repo=octoprobe/testbed_micropython",
         "--field",
+        f"job_title={form_startjob.job_title}",
+        "--field",
         f"pr_number={form_startjob.pr_number}",
         "--field",
         f"pr_repo={form_startjob.pr_repo}",
@@ -186,12 +192,13 @@ def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
     ]
 
     try:
-        _result = subprocess.run(
+        result = subprocess.run(
             args=args,
             capture_output=True,
             text=True,
             check=True,
         )
+        assert result.returncode == 0
     except subprocess.CalledProcessError as e:
         form_rc.msg_error = f"Error executing command: {e}"
         return form_rc

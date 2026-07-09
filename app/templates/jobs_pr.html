@@ -8,6 +8,16 @@ Octoprobe - testbed_micropython
 <style>
   table {
     border-collapse: collapse;
+    width: 100%;
+  }
+
+  td:first-child {
+    white-space: nowrap;
+    width: 1%;
+  }
+
+  td:last-child {
+    width: 100%;
   }
 
   td {
@@ -40,10 +50,10 @@ Octoprobe - testbed_micropython
 </div>
 
 <form method="post" action="/jobs/start_pr">
-  <table style="width: auto;">
+  <table>
     <tbody>
       <tr>
-        <td><label for="pr_number">PR number:</label></td>
+        <td><label for="pr_number">PR Number:</label></td>
         <td><input type="text" id="pr_number" name="pr_number" value="{{ form_startjob.pr_number }}">
           <br />
           Valid PRs: <a target="blank_"
@@ -52,6 +62,10 @@ Octoprobe - testbed_micropython
       </tr>
     </tbody>
     <tfoot>
+      <tr>
+        <td><label for="job_title">Job Title</label></td>
+        <td><input type="text" id="job_title" name="job_title" value="{{ form_startjob.job_title }}"></td>
+      </tr>
       <tr>
         <td><label for="arguments">Arguments</label></td>
         <td>

@@ -33,6 +33,8 @@ logger = logging.getLogger(__file__)
 
 @dataclasses.dataclass(slots=True)
 class WorkflowInput:
+    job_title: str = ""
+    "Example: For example: PR19453 Free up more space in internal flash"
     arguments: str = ""
     "Example: --only-board=ADA_ITSYBITSY_M0"
     email_testreport: str = ""
@@ -71,6 +73,7 @@ def save_as_workflow_input(
         return "" if text is None else text
 
     workflow_input = WorkflowInput(
+        job_title=space(form_startjob.job_title),
         arguments=space(form_startjob.arguments),
         email_testreport=form_startjob.username,
         repo_firmware=space(form_startjob.repo_firmware),
@@ -224,6 +227,9 @@ class WorkflowExpiry:
 
     @staticmethod
     def read_or_default(workflow_unique_id: str) -> WorkflowExpiry:
+        """
+        Example: workflow_unique_id
+        """
         base_directory = workflow_unique_id
         expiry_json = DIRECTORY_REPORTS_METADATA / base_directory / FILENAME_EXPIRY
         if expiry_json.is_file():
