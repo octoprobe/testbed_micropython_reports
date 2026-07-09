@@ -186,6 +186,19 @@ def jobs_webhooks_GET(request: Request):
     )
 
 
+@app.get("/jobs/next_jobs")
+def jobs_next_GET(request: Request):
+
+    return JINJA2_TEMPLATES.TemplateResponse(
+        request=request,
+        name="next_jobs.html",
+        context={
+            "request": request,
+            "list_repos": util_webhooks.REPOS,
+        },
+    )
+
+
 @app.post("/upload")
 async def upload_tar_file(
     file: UploadFile = File(...),

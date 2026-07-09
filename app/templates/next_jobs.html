@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}
+Octoprobe - testbed_micropython
+{% endblock %}
+
+{% block content %}
+
+<h1>Next Jobs</h1>
+
+{%- for repo in list_repos %}
+
+<h2>Repo <code>{{ repo.repo }}</code></h2>
+
+<p><b>The topmost job will be started next. For higher priority use <a href="/jobs/start_pr">Start Test on PR</a>!</b></p>
+
+<table>
+  <thead>
+    <tr>
+      <th>repo</th>
+      <th>#pr</th>
+      <th>branch</th>
+      <th>author</th>
+      <th>commit</th>
+    </tr>
+  </thead>
+  <tbody>
+    {%- for hook in repo.next_jobs %}
+    <tr>
+      <td>
+        {{ hook.repo }}
+      </td>
+      <td>
+        <a href="{{ hook.pr_url }}">{{ hook.pr_number }}</a> ({{ hook.pr_state }})
+      </td>
+      <td>
+        {{ hook.branch_name }}
+      </td>
+      <td>
+        {{ hook.author }}
+      </td>
+      <td>
+        {{ hook.commit }}
+      </td>
+    </tr>
+    {%- endfor %}
+  </tbody>
+</table>
+
+{%- endfor %}
+
+{%- endblock %}

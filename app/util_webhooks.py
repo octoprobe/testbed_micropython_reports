@@ -201,6 +201,13 @@ class Webhooks(list[Webhook]):
          * filter by ACTIVATE_FOR_AUTHORS
         Return the newest hook.
         """
+        next_jobs = self.next_jobs
+        if len(next_jobs) == 0:
+            return None
+        return next_jobs[0]
+
+    @property
+    def next_jobs(self) -> list[Webhook]:
         hooks_synchronized: dict[int, Webhook] = {}
         for hook in sorted(self, key=lambda f: f.filename):
             if hook.action != EnumAction.SYNCHRONIZE.value:
@@ -214,9 +221,7 @@ class Webhooks(list[Webhook]):
             key=lambda h: h.filename,
             reverse=True,
         )
-        if len(hooks) == 0:
-            return None
-        return hooks[0]
+        return hooks
 
     @property
     def pr_numbers(self) -> list[int]:
@@ -316,6 +321,11 @@ class Repo:
     @property
     def hooks(self) -> Webhooks:
         return Webhooks.from_directory_by_repo(repo=self.repo)
+
+    @property
+    def next_jobs(self) -> list[Webhook]:
+        hooks = Webhooks.from_directory_by_repo(repo=self.repo)
+        return hooks.next_jobs[:20]
 
 
 REPOS = [Repo(r) for r in (REPO_MICROPYTHON, REPO_EXPERIMENT)]
