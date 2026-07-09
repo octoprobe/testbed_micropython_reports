@@ -35,6 +35,8 @@ logger = logging.getLogger(__file__)
 class WorkflowInput:
     job_title: str = ""
     "Example: For example: PR19453 Free up more space in internal flash"
+    micropython_ports: str = ""
+    "Example: rp2,esp32"
     arguments: str = ""
     "Example: --only-board=ADA_ITSYBITSY_M0"
     email_testreport: str = ""
@@ -74,6 +76,7 @@ def save_as_workflow_input(
 
     workflow_input = WorkflowInput(
         job_title=space(form_startjob.job_title),
+        micropython_ports=space(form_startjob.micropython_ports),
         arguments=space(form_startjob.arguments),
         email_testreport=form_startjob.username,
         repo_firmware=space(form_startjob.repo_firmware),

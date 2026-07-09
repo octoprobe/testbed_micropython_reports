@@ -113,9 +113,13 @@ class FormStartJob(BaseModel):
     pr_number: str = ""
     pr_repo: str = ""
     job_title: str = ""
+    micropython_ports: str = ""
 
     def set_defaults(
-        self, git_ref: str, pr_check: util_pr_check.PrCheck, job_title: str
+        self,
+        git_ref: str,
+        pr_check: util_pr_check.PrCheck,
+        job_title: str,
     ) -> None:
         ports_comma_delimited = ",".join(pr_check.json_pr_ports.ports)
         self.arguments = f"--count=3 --skip-fut=FUT_WLAN --skip-fut=FUT_BLE --only-tag='mcu={ports_comma_delimited}'"
@@ -125,6 +129,7 @@ class FormStartJob(BaseModel):
         self.repo_tests = git_ref
         self.pr_repo = pr_check.json_pr_ports.pr_repo
         self.job_title = job_title
+        self.micropython_ports = ports_comma_delimited
 
     @staticmethod
     def arguments_prefilled() -> list[str]:
@@ -175,6 +180,8 @@ def gh_start_job(form_startjob: FormStartJob) -> ReturncodeStartJob:
         "--repo=octoprobe/testbed_micropython",
         "--field",
         f"job_title={form_startjob.job_title}",
+        "--field",
+        f"micropython_ports={form_startjob.micropython_ports}",
         "--field",
         f"pr_number={form_startjob.pr_number}",
         "--field",

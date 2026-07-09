@@ -64,6 +64,10 @@ Octoprobe - testbed_micropython
         <td><input type="text" id="job_title" name="job_title" value="Manually started by {{ form_startjob.username }}" readonly style="border-width: 0px;"></td>
       </tr>
       <tr>
+        <td><label for="micropython_ports">MicroPython Ports</label></td>
+        <td><input type="text" id="micropython_ports" name="micropython_ports" value="{{ form_startjob.micropython_ports }}" readonly style="border-width: 0px;"></td>
+      </tr>
+      <tr>
         <td><label for="username">User Name</label></td>
         <td><input type="text" id="username" name="username" value="{{ form_startjob.username }}" required>
           <br />
