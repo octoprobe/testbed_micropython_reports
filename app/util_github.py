@@ -123,7 +123,8 @@ class FormStartJob(BaseModel):
     ) -> None:
         ports_comma_delimited = ",".join(pr_check.json_pr_ports.ports)
         self.arguments = f"--count=3 --skip-fut=FUT_WLAN --skip-fut=FUT_BLE --only-tag='mcu={ports_comma_delimited}'"
-        self.arguments_report = "--xfail=xfail_master_478.json"
+        if self.pr_number != "17782":
+            self.arguments_report = "--xfail=xfail_master_478.json"
         self.username = USER_HMAERKI
         self.repo_firmware = git_ref
         self.repo_tests = git_ref
