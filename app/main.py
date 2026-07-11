@@ -290,12 +290,13 @@ def reports(request: Request, read_github: bool = False):
         except Exception as e:
             print(f"ERROR: {e}")
 
+    list_reports = util_github2.list_reports()
     return JINJA2_TEMPLATES.TemplateResponse(
         request=request,
         name="reports.html",
         context={
             "request": request,
-            "list_reports": util_github2.list_reports,
+            "list_reports": list_reports,
         },
     )
 
