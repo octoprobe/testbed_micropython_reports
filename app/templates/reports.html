@@ -12,8 +12,8 @@ Octoprobe - testbed_micropython
 </h1>
 
 <style>
-tr td {
-    border-top: 1px solid gray;
+td {
+    border-bottom: 1px solid gray;
 }
 </style>
 
@@ -21,8 +21,8 @@ tr td {
     <thead>
         <tr>
             <th>PR#, conclusion<br />started<br />duration</th>
-            <th>job_title<br />repo tests<br />repo firmware</th>
-            <th>job_title<br />micropython_ports<br />email, tag, expiry<br />mptest arguments</th>
+            <th>repo tests<br />repo firmware</th>
+            <th>job_title<br />email, tag, expiry<br />mptest arguments</th>
         </tr>
     </thead>
     <tbody>
@@ -73,7 +73,7 @@ tr td {
                     </form>
                 </dialog>
                 <button type="button" onclick="dlg=document.getElementById('{{ workflow_report.expiry_dialog_id }}'); dlg.showModal(); return false;">
-                    expiry {{ workflow_report.expiry.expiry }} {{ workflow_report.expiry.tag }}
+                    expiry {{ workflow_report.expiry.expiry }} {{ workflow_report.expiry.expiry_markup }}
                 </button>
             <br />
                 <i>Arguments:</i> {{ workflow_report.arguments }}

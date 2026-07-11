@@ -207,6 +207,12 @@ class WorkflowExpiry:
         now_date = WorkflowExpiry.format_expiry(0)
         return now_date > self.expiry
 
+    @property
+    def expiry_markup(self) -> Markup:
+        if self.expiry:
+            return Markup(f"(tag={self.expiry})")
+        return Markup("")
+
     @staticmethod
     def format_expiry(days: int) -> str:
         """
