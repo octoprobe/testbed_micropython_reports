@@ -42,6 +42,10 @@ def run_recurring_job() -> None:
         logger.info("Octoprobe test in progress...")
         return
 
+    reports_expired, metadata_purged = util_github2.puge_reports()
+    if reports_expired + metadata_purged > 0:
+        logger.info(f"puge_reports(): {reports_expired=} {metadata_purged=}")
+
     for repo in util_webhooks.REPOS:
         if util_webhooks.Webhooks.recurring_job(repo=repo.repo):
             return

@@ -475,7 +475,6 @@ class WorkflowReport:
     def expired(self) -> bool:
         return self.expiry.expired
 
-    @property
     def trash_if_expired(self) -> bool:
         if self.expiry.expired:
             return self.expiry.trash(workflow_unique_id=self.unique_id)
@@ -562,7 +561,7 @@ def get_gh_list() -> GhList:
     )
 
 
-def list_reports(including_expired=False) -> list:
+def list_reports(including_expired=False) -> list[WorkflowReport]:
     def report_names() -> set[str]:
         set_reports = set()
         for d in (DIRECTORY_REPORTS, DIRECTORY_REPORTS_METADATA):
@@ -582,3 +581,27 @@ def list_reports(including_expired=False) -> list:
         key=lambda wr: wr.base_directory.sortable,
         reverse=True,
     )
+
+
+def puge_reports() -> tuple[int, int]:
+    reports_expired = 0
+    metadata_purged = 0
+    reports = list_reports()
+
+    # Purge expored reports
+    for report in reports:
+        if report.trash_if_expired():
+            reports_expired += 1
+
+    # Purge metadata
+    for dir_metadata in DIRECTORY_REPORTS_METADATA.glob(pattern="*"):
+        dir_report = DIRECTORY_REPORTS / dir_metadata.name
+        if not dir_report.is_dir():
+            metadata_purged += 1
+            shutil.rmtree(dir_metadata, ignore_errors=True)
+
+    return reports_expired, metadata_purged
+
+
+if __name__ == "__main__":
+    puge_reports()
