@@ -61,10 +61,11 @@ Octoprobe - testbed_micropython
         </td>
       </tr>
     </tbody>
+    {% if form_startjob.do_validate %}
     <tfoot>
       <tr>
         <td><label for="job_title">Job Title</label></td>
-        <td><input type="text" id="job_title" name="job_title" value="{{ form_startjob.job_title }}"></td>
+        <td><input style="color: black;" type="text" id="job_title" name="job_title" value="{{ form_startjob.job_title }}"></td>
       </tr>
       <tr>
         <td><label for="micropython_ports">MicroPython Ports</label></td>
@@ -73,13 +74,13 @@ Octoprobe - testbed_micropython
       <tr>
         <td><label for="arguments">Arguments</label></td>
         <td>
-          <input type="text" id="arguments" name="arguments" value="{{ form_startjob.arguments }}">
+          <input style="color: black;" type="text" id="arguments" name="arguments" value="{{ form_startjob.arguments }}">
         </td>
       </tr>
       <tr>
         <td><label for="arguments_report">Arguments Report</label></td>
         <td>
-          <input type="text" id="arguments_report" name="arguments_report" value="{{ form_startjob.arguments_report }}">
+          <input style="color: black;" type="text" id="arguments_report" name="arguments_report" value="{{ form_startjob.arguments_report }}">
         </td>
       </tr>
       <tr>
@@ -98,6 +99,7 @@ Octoprobe - testbed_micropython
         </td>
       </tr>
     </tfoot>
+    {% endif %}
   </table>
 
   <p>
@@ -105,10 +107,12 @@ Octoprobe - testbed_micropython
       onclick="this.innerHTML='VALIDATE ⏳'; this.style.cursor='wait';">
       VALIDATE
     </button>
-    <button type="submit" name="action" value="validate_and_start"
-      onclick="this.innerHTML='VALIDATE & START ⏳'; this.style.cursor='wait';">
-      VALIDATE & START
+    {% if form_startjob.do_validate %}
+    <button type="submit" name="action" value="start"
+      onclick="this.innerHTML='START ⏳'; this.style.cursor='wait';">
+      START
     </button>
+    {% endif %}
   </p>
 
   {%- if form_rc.msg_ok %}

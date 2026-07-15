@@ -142,6 +142,11 @@ class FormStartJob(BaseModel):
             "--only-test='RUN-TESTS_STANDARD:run-tests.py --test-dirs=micropython' --only-board=RPI_PICO2-RISCV",
         ]
 
+    @property
+    def do_validate(self) -> bool:
+        assert self.action in ("", "validate", "start")
+        return self.action == "validate"
+
 
 class ReturncodeStartJob(BaseModel):
     msg_ok: str | None = None

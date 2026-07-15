@@ -87,9 +87,9 @@ def jobs_start_pr_POST(
     # Need to examine which will be the next job number
     assert isinstance(form_startjob, util_github.FormStartJob)
 
-    form_rc_pr = util_validate.validate_pr(form_startjob=form_startjob)
+    if form_startjob.do_validate:
+        form_rc_pr = util_validate.validate_pr(form_startjob=form_startjob)
 
-    if form_startjob.action == "validate":
         return _index_start(
             request=request,
             form_startjob=form_startjob,
@@ -97,14 +97,7 @@ def jobs_start_pr_POST(
             file_html="jobs_pr.html",
         )
 
-    if form_rc_pr.msg_error:
-        return _index_start(
-            request=request,
-            form_startjob=form_startjob,
-            form_rc=form_rc_pr,
-            file_html="jobs_pr.html",
-        )
-
+    form_startjob.username = util_github.USER_HMAERKI
     form_rc = util_github2.run_job2(form_startjob=form_startjob)
 
     return _index_start(
