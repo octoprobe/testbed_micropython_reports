@@ -32,6 +32,18 @@
             "jinja": true
         },
         {
+            "name": "purge_reports.py",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "app.util_github2",
+            "env": {
+                "DIRECTORY_REPORTS": "${workspaceFolder}/reports",
+                "WEBHOOK_SECRET": "1243",
+            },
+            "cwd": "${workspaceFolder}",
+            "jinja": true
+        },
+        {
             "name": "recurring_job.py",
             "type": "debugpy",
             "request": "launch",
