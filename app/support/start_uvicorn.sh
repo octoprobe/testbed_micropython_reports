@@ -17,10 +17,14 @@ if ! redis-cli -h 127.0.0.1 -p 6379 ping >/dev/null 2>&1; then
 	exit 1
 fi
 
-celery -A app.util_celery_tasks worker --loglevel=INFO --pool=solo --concurrency=1 &
+reports_directory=${DIRECTORY_REPORTS:-/server/reports}
+celery_log_directory="$(dirname "${reports_directory}")/reports_webhook"
+mkdir -p "${celery_log_directory}"
+
+celery -A app.util_celery_tasks worker --loglevel=INFO --logfile="${celery_log_directory}/logger_uvicorn-celery-worker.txt" --pool=solo --concurrency=1 &
 celery_worker_pid=$!
 
-celery -A app.util_celery_tasks beat --loglevel=INFO &
+celery -A app.util_celery_tasks beat --loglevel=INFO --logfile="${celery_log_directory}/logger_uvicorn-celery-tasks.txt" &
 celery_beat_pid=$!
 
 uvicorn app.main:app --host 0.0.0.0 --port 443 --ssl-keyfile=${SSL_KEY} --ssl-certfile=${SSL_CERT} &

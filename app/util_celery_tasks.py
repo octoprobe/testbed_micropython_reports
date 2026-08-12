@@ -47,7 +47,10 @@ def run_recurring_job() -> None:
         logger.info(f"puge_reports(): {reports_expired=} {metadata_purged=}")
 
     for repo in util_webhooks.REPOS:
-        if util_webhooks.Webhooks.recurring_job(repo=repo.repo):
+        if util_webhooks.Webhooks.recurring_job(
+            repo=repo.repo,
+            authors=util_webhooks.ACTIVATE_FOR_AUTHORS,
+        ):
             return
 
 

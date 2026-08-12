@@ -4,6 +4,10 @@
     "formatters": {
         "simple": {
             "format": "%(levelname)-8s - %(message)s"
+        },
+        "date_simple": {
+            "format": "%(asctime)s - %(levelname)-8s - %(message)s",
+            "datefmt": "%Y-%m-%d_%H:%M"
         }
     },
     "handlers": {
@@ -18,12 +22,42 @@
             "level": "ERROR",
             "formatter": "simple",
             "stream": "ext://sys.stderr"
+        },
+        "file_info": {
+            "class": "logging.FileHandler",
+            "level": "INFO",
+            "formatter": "date_simple",
+            "filename": "logger_info.txt"
+        },
+        "file_debug": {
+            "class": "logging.FileHandler",
+            "level": "DEBUG",
+            "formatter": "date_simple",
+            "filename": "logger_debug.txt"
+        },
+        "file_uvicorn": {
+            "class": "logging.FileHandler",
+            "level": "INFO",
+            "formatter": "date_simple",
+            "filename": "logger_uvicorn.txt"
         }
     },
     "root": {
         "level": "INFO",
         "handlers": [
-            "stdout"
+            "stdout",
+            "file_info",
+            "file_debug"
         ]
+    },
+    "loggers": {
+        "uvicorn.access": {
+            "level": "INFO",
+            "handlers": [
+                "stdout",
+                "file_uvicorn"
+            ],
+            "propagate": false
+        }
     }
 }

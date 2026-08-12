@@ -41,8 +41,11 @@ _TESTPARAMS = (
         ],
     ),
     Ttestparam(
+        # The last commit is 'closed': Therefor the whole pr may be purged!
         directory="files_pr19290",
         expected_filenames_to_purge=[
+            "2026-06-12_07-04-53+0000-pull_request-closed-019290.json",
+            "2026-06-12_06-58-11+0000-pull_request-synchronize-019290.json",
             "2026-06-09_10-07-50+0000-pull_request-review_requested-019290.json",
             "2026-06-09_09-51-08+0000-pull_request-synchronize-019290.json",
             "2026-06-09_09-44-30+0000-pull_request-synchronize-019290.json",
@@ -50,6 +53,17 @@ _TESTPARAMS = (
             "2026-06-09_09-32-49+0000-pull_request-synchronize-019290.json",
             "2026-06-09_09-22-35+0000-pull_request-synchronize-019290.json",
             "2026-06-09_04-26-12+0000-pull_request-labeled-019290.json",
+        ],
+    ),
+    Ttestparam(
+        directory="files_pr19589",
+        expected_filenames_to_purge=[
+            "2026-08-12_13-12-08+0000-pull_request-synchronize-019589.json",
+            "2026-08-12_03-49-35+0000-pull_request-milestoned-019589.json",
+            "2026-08-12_03-49-32+0000-pull_request-review_requested-019589.json",
+            "2026-08-10_00-52-10+0000-pull_request-edited-019589.json",
+            "2026-08-07_07-04-57+0000-pull_request-opened-019589.json",
+            "2026-08-07_07-04-57+0000-pull_request-labeled-019589.json",
         ],
     ),
 )
@@ -62,6 +76,6 @@ def test_purge_pr(testparam: Ttestparam) -> None:
     hooks = util_webhooks.Webhooks.from_directory(
         DIRECTORY_OF_THIS_FILE / testparam.directory
     )
-    hooks_to_purge = hooks.purge()
+    hooks_to_purge = hooks.purgeable()
     filenames_to_purge = [f.filename for f in hooks_to_purge]
     assert testparam.expected_filenames_to_purge == filenames_to_purge

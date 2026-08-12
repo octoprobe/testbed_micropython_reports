@@ -21,7 +21,7 @@ class Ttestparam:
 _TESTPARAMS = (
     Ttestparam(
         directory="sample_data",
-        expected_webhook_filename="2026-07-07_07-47-02+0000-pull_request-synchronize-019422.json",
+        expected_webhook_filename="2026-07-07_08-16-00+0000-pull_request-synchronize-016798.json",
     ),
     Ttestparam(
         directory="files_pr19349",
@@ -29,7 +29,11 @@ _TESTPARAMS = (
     ),
     Ttestparam(
         directory="files_pr19290",
-        expected_webhook_filename=None,
+        expected_webhook_filename="2026-06-12_06-58-11+0000-pull_request-synchronize-019290.json",
+    ),
+    Ttestparam(
+        directory="files_pr19589",
+        expected_webhook_filename="2026-08-12_13-25-04+0000-pull_request-synchronize-019589.json",
     ),
 )
 
@@ -37,7 +41,7 @@ _TESTPARAMS = (
 @pytest.mark.parametrize(
     "testparam", _TESTPARAMS, ids=lambda testparam: testparam.pytest_id
 )
-def test_purge_pr(testparam: Ttestparam) -> None:
+def test_next_job(testparam: Ttestparam) -> None:
     hooks = util_webhooks.Webhooks.from_directory(
         DIRECTORY_OF_THIS_FILE / testparam.directory
     )

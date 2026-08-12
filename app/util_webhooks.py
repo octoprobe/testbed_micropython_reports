@@ -37,7 +37,7 @@ logger = logging.getLogger(__file__)
 REPO_MICROPYTHON = "micropython/micropython"
 REPO_EXPERIMENT = "hmaerki/experiment_webhook_PR"
 
-ACTIVATE_FOR_AUTHORS = (
+ACTIVATE_FOR_AUTHORS = [
     "agatti",
     "andrewleech",
     "dpgeorge",
@@ -47,12 +47,12 @@ ACTIVATE_FOR_AUTHORS = (
     "octoprobe-bot",
     "projectgus",
     # "jonnor",
-    # "josverl",
-    # "mattytrentini",
+    "josverl",
+    "mattytrentini",
     # "pimoroni",
     # "ricksorensen",
     # "robert-hh",
-)
+]
 assert any(a.islower() for a in ACTIVATE_FOR_AUTHORS)
 
 
@@ -194,6 +194,13 @@ class Webhook:
 
 
 class Webhooks(list[Webhook]):
+    @staticmethod
+    def assert_authors_list(authors: list[str]) -> None:
+        assert isinstance(authors, list)
+        for author in authors:
+            assert isinstance(author, str)
+            assert author.lower() == author
+
     @property
     def next_job(self) -> Webhook | None:
         """
@@ -213,8 +220,6 @@ class Webhooks(list[Webhook]):
         for hook in sorted(self, key=lambda f: f.filename):
             if hook.action != EnumAction.SYNCHRONIZE.value:
                 continue
-            if hook.author.lower() not in ACTIVATE_FOR_AUTHORS:
-                continue
             hooks_synchronized[hook.pr_number] = hook
 
         hooks = sorted(
@@ -231,7 +236,17 @@ class Webhooks(list[Webhook]):
             pr_numbers.add(w.pr_number)
         return sorted(pr_numbers)
 
-    def purge(self) -> Webhooks:
+    def by_authors(self, authors: list[str]) -> Webhooks:
+        """
+        Return the hooks which do NOT belong to any authors
+        """
+        Webhooks.assert_authors_list(authors=authors)
+        return Webhooks([h for h in self if h.author.lower() not in authors])
+
+    def purgeable(self) -> Webhooks:
+        """
+        Return the hooks which we can be purged
+        """
         to_purge = Webhooks()
         for pr_number in self.pr_numbers:
             to_purge.extend(self.purge_pr(pr_number=pr_number))
@@ -241,6 +256,9 @@ class Webhooks(list[Webhook]):
         files = [w for w in self if w.pr_number == pr_number]
         files.sort(key=lambda f: f.filename, reverse=True)
         for i, file in enumerate(files):
+            if file.action in EnumAction.CLOSED.value:
+                # Purge all files
+                return Webhooks(files)
             if file.action in EnumAction.SYNCHRONIZE.value:
                 # Purge all files OLDER that this one
                 return Webhooks(files[i + 1 :])
@@ -259,7 +277,10 @@ class Webhooks(list[Webhook]):
             filename_todo = directory_todo / w.filename
             filename_done = directory_done / w.filename
             logger.debug(f"{directory_todo} -> {directory_done}: Purge {w.filename}")
-            filename_todo.rename(filename_done)
+            try:
+                filename_todo.rename(filename_done)
+            except Exception as e:
+                logger.error(f"{filename_todo}: {e!r}!")
 
     def purge_to_directory_by_repo(self, repo: str) -> None:
         directory_todo = repo_directory_name(repo=repo, enumdone=EnumDone.TODO)
@@ -270,21 +291,29 @@ class Webhooks(list[Webhook]):
         )
 
     @classmethod
-    def purge_by_repo(cls, repo: str) -> None:
+    def purge_by_repo(cls, repo: str, authors: list[str]) -> None:
         """
         Purge files from folder 'todo' to 'done'.
         """
         hooks = Webhooks.from_directory_by_repo(repo=repo)
-        hooks_to_purge = hooks.purge()
+        hooks_to_purge_by_authors = hooks.by_authors(authors=authors)
+        set_authors = sorted({h.author for h in hooks_to_purge_by_authors})
+        logger.info(
+            f"hooks_to_purge_by_authors={len(hooks_to_purge_by_authors)}: {repr(set_authors)}"
+        )
+        hooks_to_purge_by_authors.purge_to_directory_by_repo(repo=repo)
+
+        hooks = Webhooks.from_directory_by_repo(repo=repo)
+        hooks_to_purge = hooks.purgeable()
         logger.info(f"hooks_to_purge={len(hooks_to_purge)}")
         hooks_to_purge.purge_to_directory_by_repo(repo=repo)
 
     @classmethod
-    def recurring_job(cls, repo: str) -> bool:
+    def recurring_job(cls, repo: str, authors: list[str]) -> bool:
         """
         return True if a Octoprobe action has been started
         """
-        cls.purge_by_repo(repo=repo)
+        cls.purge_by_repo(repo=repo, authors=authors)
         hooks = cls.from_directory_by_repo(repo=repo)
         webhook_job = hooks.next_job
         if webhook_job is not None:
