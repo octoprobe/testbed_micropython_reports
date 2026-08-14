@@ -53,7 +53,7 @@ Octoprobe - testbed_micropython
   <table>
     <tbody>
       <tr>
-        <td><label for="pr_number">PR Number:</label></td>
+        <td><label for="pr_number">PR Number</label></td>
         <td><input type="text" id="pr_number" name="pr_number" value="{{ form_startjob.pr_number }}">
           <br />
           Valid PRs: <a target="blank_"
@@ -65,37 +65,43 @@ Octoprobe - testbed_micropython
     <tfoot>
       <tr>
         <td><label for="job_title">Job Title</label></td>
-        <td><input style="color: black;" type="text" id="job_title" name="job_title" value="{{ form_startjob.job_title }}"></td>
+        <td><input style="color: black;" type="text" id="job_title" name="job_title"
+            value="{{ form_startjob.job_title }}"></td>
       </tr>
       <tr>
         <td><label for="micropython_ports">MicroPython Ports</label></td>
-        <td><input type="text" id="micropython_ports" name="micropython_ports" value="{{ form_startjob.micropython_ports }}"></td>
+        <td><input type="text" id="micropython_ports" name="micropython_ports"
+            value="{{ form_startjob.micropython_ports }}"></td>
       </tr>
       <tr>
         <td><label for="arguments">Arguments</label></td>
         <td>
-          <input style="color: black;" type="text" id="arguments" name="arguments" value="{{ form_startjob.arguments }}">
+          <input style="color: black;" type="text" id="arguments" name="arguments"
+            value="{{ form_startjob.arguments }}">
         </td>
       </tr>
       <tr>
         <td><label for="arguments_report">Arguments Report</label></td>
         <td>
-          <input style="color: black;" type="text" id="arguments_report" name="arguments_report" value="{{ form_startjob.arguments_report }}">
+          <input style="color: black;" type="text" id="arguments_report" name="arguments_report"
+            value="{{ form_startjob.arguments_report }}">
         </td>
       </tr>
       <tr>
         <td><label for="repo_tests">Tests</label></td>
         <td><input type="text" id="repo_tests" name="repo_tests" required, value="{{ form_startjob.repo_tests }}"
-            readonly><br />
-          The repo/branch for the testcode.
+            readonly>
         </td>
       </tr>
       <tr>
         <td><label for="repo_firmware">Firmware</label></td>
         <td><input type="text" id="repo_firmware" name="repo_firmware" value="{{ form_startjob.repo_firmware }}"
             readonly>
-          <br />
-          The repo/branch to build the firmware.
+        </td>
+      </tr>
+      <tr>
+        <td><label for="pr_repo">PR Repo</label></td>
+        <td><input type="text" id="pr_repo" name="pr_repo" value="{{ form_startjob.pr_repo }}" readonly>
         </td>
       </tr>
     </tfoot>
@@ -108,8 +114,7 @@ Octoprobe - testbed_micropython
       VALIDATE
     </button>
     {% if form_startjob.do_validate %}
-    <button type="submit" name="action" value="start"
-      onclick="this.innerHTML='START ⏳'; this.style.cursor='wait';">
+    <button type="submit" name="action" value="start" onclick="this.innerHTML='START ⏳'; this.style.cursor='wait';">
       START
     </button>
     {% endif %}
