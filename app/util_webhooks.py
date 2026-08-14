@@ -252,6 +252,18 @@ class Webhooks(list[Webhook]):
             to_purge.extend(self.purge_pr(pr_number=pr_number))
         return to_purge
 
+    def purgeable_rigorous(self) -> Webhooks:
+        """
+        Return the hooks which we can be purged
+        """
+
+        def rigorous(h: Webhook) -> bool:
+            if h.action not in (EnumAction.CLOSED.value, EnumAction.SYNCHRONIZE.value):
+                return True
+            return False
+
+        return Webhooks([h for h in self if rigorous(h)])
+
     def purge_pr(self, pr_number: int) -> Webhooks:
         files = [w for w in self if w.pr_number == pr_number]
         files.sort(key=lambda f: f.filename, reverse=True)
@@ -295,18 +307,31 @@ class Webhooks(list[Webhook]):
         """
         Purge files from folder 'todo' to 'done'.
         """
-        hooks = Webhooks.from_directory_by_repo(repo=repo)
-        hooks_to_purge_by_authors = hooks.by_authors(authors=authors)
-        set_authors = sorted({h.author for h in hooks_to_purge_by_authors})
-        logger.info(
-            f"hooks_to_purge_by_authors={len(hooks_to_purge_by_authors)}: {repr(set_authors)}"
-        )
-        hooks_to_purge_by_authors.purge_to_directory_by_repo(repo=repo)
 
-        hooks = Webhooks.from_directory_by_repo(repo=repo)
-        hooks_to_purge = hooks.purgeable()
-        logger.info(f"hooks_to_purge={len(hooks_to_purge)}")
-        hooks_to_purge.purge_to_directory_by_repo(repo=repo)
+        def rigorous():
+            hooks = Webhooks.from_directory_by_repo(repo=repo)
+            to_purge = hooks.purgeable_rigorous()
+            logger.info(f"hooks_to_purge_rigorous={len(to_purge)}")
+            to_purge.purge_to_directory_by_repo(repo=repo)
+
+        def by_author():
+            hooks = Webhooks.from_directory_by_repo(repo=repo)
+            to_purge = hooks.by_authors(authors=authors)
+            set_authors = sorted({h.author for h in to_purge})
+            logger.info(
+                f"hooks_to_purge_by_authors={len(to_purge)}: {repr(set_authors)}"
+            )
+            to_purge.purge_to_directory_by_repo(repo=repo)
+
+        def purge():
+            hooks = Webhooks.from_directory_by_repo(repo=repo)
+            to_purge = hooks.purgeable()
+            logger.info(f"hooks_to_purge={len(to_purge)}")
+            to_purge.purge_to_directory_by_repo(repo=repo)
+
+        rigorous()
+        by_author()
+        purge()
 
     @classmethod
     def recurring_job(cls, repo: str, authors: list[str]) -> bool:

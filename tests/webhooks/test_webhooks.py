@@ -41,7 +41,7 @@ _TESTPARAMS = (
         ],
     ),
     Ttestparam(
-        # The last commit is 'closed': Therefor the whole pr may be purged!
+        # The last commit is 'closed': Therefore the whole pr may be purged!
         directory="files_pr19290",
         expected_filenames_to_purge=[
             "2026-06-12_07-04-53+0000-pull_request-closed-019290.json",

@@ -166,19 +166,6 @@ def jobs_start_POST(
     )
 
 
-@app.get("/jobs/webhooks")
-def jobs_webhooks_GET(request: Request):
-
-    return JINJA2_TEMPLATES.TemplateResponse(
-        request=request,
-        name="webhooks.html",
-        context={
-            "request": request,
-            "list_repos": util_webhooks.REPOS,
-        },
-    )
-
-
 @app.get("/jobs/next_jobs")
 def jobs_next_GET(request: Request):
 
