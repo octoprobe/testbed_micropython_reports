@@ -10,13 +10,13 @@ docker compose stop
 docker run --rm --name certbot \
   --user "$(id -u www-data):$(id -g www-data)" \
   --group-add "$(id -g www-insecure)" \
-  --network host \
+  -p 92.205.27.173:80:8080 \
   -v "./letsencrypt/etc:/etc/letsencrypt" \
   -v "./letsencrypt/var:/var/lib/letsencrypt" \
   certbot/certbot:v2.11.0 certonly --standalone \
   --cert-name reports.octoprobe.org \
-  --http-01-address 92.205.27.173 \
-  --http-01-port 80 \
+  --standalone \
+  --http-01-port 8080 \
   --config-dir /etc/letsencrypt \
   --work-dir /var/lib/letsencrypt \
   --logs-dir /var/lib/letsencrypt/log \
