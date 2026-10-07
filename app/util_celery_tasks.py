@@ -5,7 +5,7 @@ from celery import Celery
 
 from . import util_github2, util_webhooks
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 app = Celery(
     "testbed_micropython_reports",

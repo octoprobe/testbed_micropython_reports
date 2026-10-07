@@ -16,7 +16,7 @@ from . import constants
 from .render_directory import render_directory_or_file
 from .render_log import SEVERITY_DEFAULT
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 util_logging.init_logging(level=logging.INFO)
 

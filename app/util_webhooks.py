@@ -32,7 +32,7 @@ from app import constants
 
 from . import util_github, util_github2, util_validate
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 REPO_MICROPYTHON = "micropython/micropython"
 REPO_EXPERIMENT = "hmaerki/experiment_webhook_PR"

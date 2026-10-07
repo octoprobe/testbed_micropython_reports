@@ -28,7 +28,7 @@ from app.constants import (
 
 from . import util_github
 
-logger = logging.getLogger(__file__)
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass(slots=True)
