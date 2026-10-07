@@ -227,6 +227,13 @@ class WorkflowExpiry:
 
     def write(self, workflow_unique_id: str) -> None:
         base_directory = workflow_unique_id
+        directory_report = DIRECTORY_REPORTS / base_directory
+        if not directory_report.is_dir():
+            logger.warning(
+                f"WorkflowExpiry: No reports directory exists for '{workflow_unique_id}'. Skip"
+            )
+            return
+
         filename = DIRECTORY_REPORTS_METADATA / base_directory / FILENAME_EXPIRY
         filename.parent.mkdir(parents=True, exist_ok=True)
         json_text = json.dumps(dataclasses.asdict(self), indent=4)
@@ -289,7 +296,9 @@ class BaseDirectory:
         otherwise: local_hostname_20250116-185542
         """
 
-        assert (self.manual_workflow is None) is (self.is_github_workflow)
+        assert (self.manual_workflow is None) is (self.is_github_workflow), (
+            f"{base_directory=}"
+        )
 
         # local_hostname_20250116-185542
         self.number = 0

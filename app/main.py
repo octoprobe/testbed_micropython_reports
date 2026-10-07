@@ -268,7 +268,7 @@ def reports(request: Request, read_github: bool = False):
         try:
             util_github2.get_gh_list()
         except Exception as e:
-            print(f"ERROR: {e}")
+            logger.warning(f"ERROR: {e}")
 
     list_reports = util_github2.list_reports()
     return JINJA2_TEMPLATES.TemplateResponse(
