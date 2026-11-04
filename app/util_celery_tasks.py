@@ -16,13 +16,15 @@ app = Celery(
 # Keep startup broker retries explicit for Celery 6+ compatibility.
 app.conf.broker_connection_retry_on_startup = "true"
 
-app.conf.beat_schedule = {
-    "recurring_job": {
-        "task": "app.util_celery_tasks.recurring_job",
-        "schedule": 300.0,
-        # "schedule": 10.0,
+CELERY_STARTS_JOBS = False
+if CELERY_STARTS_JOBS:
+    app.conf.beat_schedule = {
+        "recurring_job": {
+            "task": "app.util_celery_tasks.recurring_job",
+            "schedule": 300.0,
+            # "schedule": 10.0,
+        }
     }
-}
 
 
 @app.task
