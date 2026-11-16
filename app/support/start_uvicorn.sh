@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
+
 redis-server /server/app/support/redis.conf &
 redis_pid=$!
 

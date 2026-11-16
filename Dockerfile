@@ -21,10 +21,13 @@ COPY ./app /server/app
 RUN pip install --no-cache-dir .
 
 # Hack
-RUN mkdir -p /var/www
-RUN chmod a+rwx /var/www
-RUN mkdir /octoprobe_downloads
-RUN chmod a+rwx /octoprobe_downloads
+RUN mkdir -p /var/www && \
+    chmod a+rwx /var/www && \
+    mkdir /octoprobe_downloads && \
+    chmod a+rwx /octoprobe_downloads
+
+ENV OCTOPROBE_DOWNLOADS=/octoprobe_downloads
+ENV HOME=/octoprobe_downloads
 
 # Expose the port the app runs in
 EXPOSE 80

@@ -7,6 +7,8 @@ services:
     volumes:
       - ./.:/server
       - ./letsencrypt/etc:/etc/letsencrypt:ro
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/group:/etc/group:ro
     ports:
       - '${APP_HOST}:${APP_PORT}:443'
     user: '${UID}:${GID}'
