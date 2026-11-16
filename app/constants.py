@@ -1,6 +1,9 @@
 import os
 import pathlib
 
+CELERY_STARTS_JOBS = True
+START_NEW_JOB = False
+
 ENV_DIRECTORY_REPORTS = "DIRECTORY_REPORTS"
 
 

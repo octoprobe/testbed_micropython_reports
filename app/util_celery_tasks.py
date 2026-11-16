@@ -3,7 +3,7 @@ import os
 
 from celery import Celery
 
-from . import util_github2, util_webhooks
+from . import constants, util_github2, util_webhooks
 
 logger = logging.getLogger(__name__)
 
@@ -16,8 +16,7 @@ app = Celery(
 # Keep startup broker retries explicit for Celery 6+ compatibility.
 app.conf.broker_connection_retry_on_startup = "true"
 
-CELERY_STARTS_JOBS = False
-if CELERY_STARTS_JOBS:
+if constants.CELERY_STARTS_JOBS:
     app.conf.beat_schedule = {
         "recurring_job": {
             "task": "app.util_celery_tasks.recurring_job",

@@ -340,12 +340,13 @@ class Webhooks(list[Webhook]):
         """
         cls.purge_by_repo(repo=repo, authors=authors)
         hooks = cls.from_directory_by_repo(repo=repo)
-        webhook_job = hooks.next_job
-        if webhook_job is not None:
-            webhook_job.purge_to_directory_by_repo(repo=repo)
-            started = run_job3(repo=repo, webhook_job=webhook_job)
-            if started:
-                return True
+        if constants.START_NEW_JOB:
+            webhook_job = hooks.next_job
+            if webhook_job is not None:
+                webhook_job.purge_to_directory_by_repo(repo=repo)
+                started = run_job3(repo=repo, webhook_job=webhook_job)
+                if started:
+                    return True
 
         return False
 
