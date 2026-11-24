@@ -15,7 +15,7 @@
             ],
             "cwd": "${workspaceFolder}",
             "env": {
-                "DIRECTORY_REPORTS": "${workspaceFolder}/reports",
+                "DIRECTORY_REPORTS": "${workspaceFolder:testbed_micropython_reports}/reports",
                 "WEBHOOK_SECRET": "1243",
             },
             "envFile": "${workspaceFolder}/.env",
@@ -37,7 +37,7 @@
             "request": "launch",
             "module": "app.util_github2",
             "env": {
-                "DIRECTORY_REPORTS": "${workspaceFolder}/reports",
+                "DIRECTORY_REPORTS": "${workspaceFolder:testbed_micropython_reports}/reports",
                 "WEBHOOK_SECRET": "1243",
             },
             "cwd": "${workspaceFolder}",
@@ -51,7 +51,7 @@
             "args": [],
             "cwd": "${workspaceFolder}",
             "env": {
-                "DIRECTORY_REPORTS": "${workspaceFolder}/reports/"
+                "DIRECTORY_REPORTS": "${workspaceFolder:testbed_micropython_reports}/reports/"
             },
             "jinja": true
         },
@@ -69,6 +69,30 @@
             "env": {
                 "PYTHONPATH": "${workspaceFolder:testbed_micropython_reports}"
             }
-        }
+        },
+        {
+            "name": "mptest reports",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "testbed_micropython.mptest.cli",
+            "cwd": "${workspaceFolder:testbed_micropython_reports}",
+            "args": [
+                "reports",
+                "--reports=${workspaceFolder:testbed_micropython_reports}/reports",
+                "--url-reports=http://localhost:8000",
+            ],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
+        {
+            "name": "mptest reports http-server",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "http.server",
+            "cwd": "${workspaceFolder:testbed_micropython_reports}/reports",
+            "args": [],
+            "console": "integratedTerminal",
+            "justMyCode": false,
+        },
     ]
 }
