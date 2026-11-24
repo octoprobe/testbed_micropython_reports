@@ -80,6 +80,7 @@
                 "reports",
                 "--reports=${workspaceFolder:testbed_micropython_reports}/reports",
                 "--url-reports=http://localhost:8000",
+                "--count=1",
             ],
             "console": "integratedTerminal",
             "justMyCode": false,
